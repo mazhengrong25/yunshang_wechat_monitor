@@ -2,8 +2,8 @@
  * @Description: 侧边栏
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 16:44:46
- * @LastEditTime: 2021-04-16 10:19:38
- * @LastEditors: wish.WuJunLong
+ * @LastEditTime: 2021-05-04 15:01:21
+ * @LastEditors: mzr
 -->
 <template>
   <div class="global_aside">
@@ -27,7 +27,19 @@ export default {
   name: "Aside",
   data() {
     return {};
+
   },
+  methods: {
+
+    // 跳转到聊天存档
+    // openChat() {
+    //     this.$router.push({
+    //       name: 'Index',
+    //       path: "/index",
+    //     });
+    // }
+  }
+   
 };
 </script>
 
@@ -54,6 +66,9 @@ export default {
         cursor: pointer;
         &:not(&:nth-child(even)){
           margin-right: 20px;
+        }
+        &:active{
+          color: #fff;
         }
       }
     }

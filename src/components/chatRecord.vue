@@ -2,14 +2,14 @@
  * @Description: 聊天存档列表 ---- 聊天记录
  * @Author: mzr
  * @Date: 2021-04-28 14:27:48
- * @LastEditTime: 2021-04-28 17:16:10
+ * @LastEditTime: 2021-05-04 21:01:22
  * @LastEditors: mzr
 -->
 <template>
   <div class="chat_record">
       <div class="record_top">
           <div class="top_action"><el-checkbox v-model="checkAction">只看员工发送</el-checkbox></div>
-          <div class="top_total">共有36条"哈哈哈哈哈"相关记录</div>
+          <div class="top_total">共有36条"{{inputSearch}}"相关记录</div>
       </div>
       <div class="record_list">
            <el-table
@@ -20,7 +20,10 @@
                     label="发送人">
                     <template slot-scope="scope">
                         <div class="table_wechat">
-                            <img class="table_img"/>
+                            <div class="table_img">
+                                <img v-if="scope.row.photoUrl" :src="scope.row.photoUrl" />
+                                <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                            </div>
                             <div class="table_item">
                                 <div class="person_name">{{scope.row.senderName}}</div>
                                 <div class="wechat_no">{{scope.row.senderWechat}}</div>
@@ -56,7 +59,8 @@
                 </el-table-column>
             </el-table>
             <!-- 分页 -->
-            <el-pagination 
+            <el-pagination
+                background
                 layout="prev, pager, next" 
                 :total="50">
             </el-pagination>
@@ -70,8 +74,11 @@
         height="75%"
         >
             <div slot="title" class="chat_dialog">
-                <img class="title_img" />
-                <span>名称</span>
+                <div class="title_img">
+                    <img v-if="recordList.photoUrl" :src="recordList.photoUrl" />
+                    <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                </div>
+                <span>{{recordList.senderName}}</span>
             </div>
             <!-- 内容 -->
             <div class="dialog_content">
@@ -83,11 +90,17 @@
                             <p>{{item.name}} {{item.contentTime}}</p>
                             <div class="sender_right_bubble">{{item.content}}</div>
                         </div>
-                        <img class="sender_item_pic" :src="item.photoUrl" />
+                        <div class="sender_item_pic">
+                            <img v-if="item.photoUrl" :src="item.photoUrl" />
+                            <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                        </div>
                     </div>
                     <!-- 接收方 -->
                     <div v-else class="dialog_item">
-                        <img class="item_pic" :src="item.photoUrl" />
+                        <div class="item_pic">
+                            <img v-if="item.photoUrl" :src="item.photoUrl" />
+                            <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                        </div>
                         <div class="item_right">
                             <p>{{item.contentTime}} {{item.name}}</p>
                             <div class="right_bubble">{{item.content}}</div>
@@ -101,9 +114,15 @@
 
 <script>
 export default {
+    props: {
+        inputSearch: {
+            type: String,
+            default: () => "",
+        }
+
+    },
     data() {
         return {
-
             checkAction: false, // 多选框状态
 
             showDetail: false, // 聊天记录对话框
@@ -116,6 +135,7 @@ export default {
                     senderType:"客户",
                     chatType:"私聊",
                     chatContent:"要不要一起出去旅游，哈哈哈哈",
+                    photoUrl:""
                 },
                  {
                     senderName:"美少女战士",
@@ -123,6 +143,7 @@ export default {
                     senderType:"客户",
                     chatType:"私聊",
                     chatContent:"要不要一起出去旅游，哈哈哈哈",
+                    photoUrl:""
                 },
                  {
                     senderName:"美少女战士",
@@ -130,6 +151,7 @@ export default {
                     senderType:"客户",
                     chatType:"私聊",
                     chatContent:"要不要一起出去旅游，哈哈哈哈",
+                    photoUrl:""
                 }
 
             ],
@@ -210,14 +232,11 @@ export default {
     .record_top {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         padding:25px 38px;
-        .top_action {
-
-        }
         .top_total {
             font-size: 10px;
             color: lightgray;
+            margin-left: 35%;
         }
     }
     .record_list {
@@ -234,127 +253,165 @@ export default {
                 }
             }
             .table_img {
-                width: 50px;
-                height: 50px;
+                width: 45px;
+                height: 45px;
+                background-color: lightgray;
                 margin-right: 10px;
-            }
+                img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                }
+                .not_img {
+                    width: 100%;
+                    height: 100%;
+                    line-height: 45px;
+                    text-align: center;
+                }
         }
         // 分页
         .el-pagination {
             text-align: right;
             margin: 20px 15px;
         }
-    }
-
-    // 对话框
-    .chatDialog {
-        // 标题调整
-        .chat_dialog {
-            display: flex;
-            align-items: center;
-            .title_img {
-                width: 50px;
-                height: 50px;
-                margin-right: 10px;
-            }
-            span {
-
-            }
         }
-        .el-dialog__header {
-            border-bottom: 1px solid lightgray;
-            .el-dialog__headerbtn {
-                top:28px;
-                right:28px;
-                font-size: 23px;
-                font-weight: bold;
-            }
+
+        // 页数
+        .el-pagination {
+            text-align: right;
+            margin: 20px 15px;
         }
-        // 内容
-        .dialog_content {
-            width:auto;
-            overflow-y: auto;
-            height: calc(100vh - 81px);
-            .content_date {
-                color: lightgrey;
-                font-size: 10px;
+        // 对话框
+        .chatDialog {
+            // 标题调整
+            .chat_dialog {
                 display: flex;
-                justify-content: center;
-                padding-top:15px;
-            }
-            .left_message {
-                .dialog_item {
-                    display: flex;
-                    padding: 15px;
-                    .item_pic {
-                        width: 45px;
-                        height: 45px;
-                        background-color: lightgray;
-                        margin-right: 10px;
-                        margin-top: 20px;
-                    }
-                    .item_right {
-                        p {
-                            color: lightgrey;
-                            font-size: 10px;
-                            margin-bottom: 5px;
-                        }
-                        .right_bubble {
-                            border-radius: 0px 20px 20px 20px;
-                            background-color: lightgray;
-                            padding: 10px;
-                            font-size: 14px;
-                            min-width:100px;
-                            max-width: 40%;
-                            word-wrap: break-word;
-                            word-break: break-all;
-                        }
-                    }
-                    .withdraw {
-                        color:red;
-                        font-size:12px;
-                        background-color: papayawhip;
-                        padding: 5px;
-                        margin: 6px 15px;
-                    }
+                align-items: center;
+                .title_img {
+                    width: 50px;
+                    height: 50px;
+                    margin-right: 10px;
+                }
+                span {
+
                 }
             }
-            .right_message {
-                text-align: right;
-                .sender_dialog_item {
+            .el-dialog__header {
+                border-bottom: 1px solid lightgray;
+                .el-dialog__headerbtn {
+                    top:28px;
+                    right:28px;
+                    font-size: 23px;
+                    font-weight: bold;
+                }
+            }
+            // 内容
+            .dialog_content {
+                width:auto;
+                overflow-y: auto;
+                height: calc(100vh - 81px);
+                .content_date {
+                    color: lightgrey;
+                    font-size: 10px;
                     display: flex;
-                    align-items: center;
-                    justify-content: flex-end;
-                    padding: 15px;
-                    .sender_item_pic {
-                        width: 45px;
-                        height: 45px;
-                        background-color: lightgray;
-                        margin-left: 10px;
-                        // margin-top: 20px;
-                    }
-                    .sender_item_right {
-                        p {
-                            color: lightgrey;
-                            font-size: 10px;
-                            // margin-bottom: 5px;
+                    justify-content: center;
+                    padding-top:15px;
+                }
+                .left_message {
+                    .dialog_item {
+                        display: flex;
+                        padding: 15px;
+                        .item_pic {
+                            width: 45px;
+                            height: 45px;
+                            background-color: lightgray;
+                            margin-right: 10px;
+                            margin-top: 20px;
+                            img {
+                                    width: 100%;
+                                    height: 100%;
+                                    object-fit: contain;
+                            }
+                            .not_img {
+                                width: 100%;
+                                height: 100%;
+                                line-height: 45px;
+                                text-align: center;
+                            }
                         }
-                        .sender_right_bubble {
-                            border-radius: 20px 0px 20px 20px;
-                            background-color: #409eff;
-                            color:#fff;
-                            font-size: 14px;
-                            padding: 10px;
-                            // min-width:100px;
-                            // max-width: 40%;
-                            // word-wrap: break-word;
-                            // word-break: break-all;
+                        .item_right {
+                            p {
+                                color: lightgrey;
+                                font-size: 10px;
+                                margin-bottom: 5px;
+                            }
+                            .right_bubble {
+                                border-radius: 0px 20px 20px 20px;
+                                background-color: lightgray;
+                                padding: 10px;
+                                font-size: 14px;
+                                min-width:100px;
+                                max-width: 40%;
+                                word-wrap: break-word;
+                                word-break: break-all;
+                            }
+                        }
+                        .withdraw {
+                            color:red;
+                            font-size:12px;
+                            background-color: papayawhip;
+                            padding: 5px;
+                            margin: 6px 15px;
+                        }
+                    }
+                }
+                .right_message {
+                    text-align: right;
+                    .sender_dialog_item {
+                        display: flex;
+                        align-items: center;
+                        justify-content: flex-end;
+                        padding: 15px;
+                        .sender_item_pic {
+                            width: 45px;
+                            height: 45px;
+                            background-color: lightgray;
+                            margin-left: 10px;
+                            img {
+                                width: 100%;
+                                height: 100%;
+                                object-fit: contain;
+                            }
+                            .not_img {
+                                width: 100%;
+                                height: 100%;
+                                text-align: center;
+                                line-height: 45px;
+                            }
+                        }
+                        .sender_item_right {
+                            p {
+                                color: lightgrey;
+                                font-size: 10px;
+                                // margin-bottom: 5px;
+                            }
+                            .sender_right_bubble {
+                                border-radius: 20px 0px 20px 20px;
+                                background-color: #409eff;
+                                color:#fff;
+                                font-size: 14px;
+                                padding: 10px;
+                                // min-width:100px;
+                                // max-width: 40%;
+                                // word-wrap: break-word;
+                                // word-break: break-all;
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
+    }
 }
 </style>

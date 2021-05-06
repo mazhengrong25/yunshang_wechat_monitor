@@ -2,7 +2,7 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-04-29 12:44:26
+ * @LastEditTime: 2021-05-06 09:43:10
  * @LastEditors: mzr
 -->
 
@@ -11,7 +11,11 @@
         <div class="content_top">
             <div class="top_title">聊天存档</div>
             <div class="top_action">
-                <el-input placeholder="聊天信息搜索" v-model="inputSearch" @keyup.enter.native="handleInputSearch">
+                <el-input 
+                    placeholder="聊天信息搜索" 
+                    v-model="inputSearch"
+                    clearable 
+                    @keyup.enter.native="handleInputSearch">
                     <i slot="suffix" class="el-input__icon el-icon-search"></i>
                 </el-input>
             </div>
@@ -19,46 +23,95 @@
 
         <div class="content_item" v-if="inputSearch === ''">
             <div class="item_action">
+                <!-- 员工  客户  群 -->
                 <div class="action_radio">
-                    <el-radio-group v-model="checkList">
-                        <el-radio v-for="(item,index) in radioList" :key="index" :label="item.sign">{{item.label}}</el-radio>
+                    <el-radio-group 
+                        v-model="checkList">
+                        <el-radio 
+                            v-for="(item,index) in radioList" 
+                            :key="index" 
+                            :label="item.sign">{{item.label}}</el-radio>
                     </el-radio-group>
                 </div>
-
+                <!-- 筛选组 -->
                 <div class="action_item">
-
-                    <el-select style="width:200px" v-model="searchData.departList" placeholder="部门" v-if="checkList === '1'">
-                        <el-option v-for="item in options_depart" :key="item" :label="item" :value="item"></el-option>
+                    <el-select 
+                        style="width:200px" 
+                        v-model="searchData.departList" 
+                        placeholder="部门"
+                        clearable 
+                        v-if="checkList === '1'">
+                        <el-option 
+                            v-for="item in options_depart" 
+                            :key="item" 
+                            :label="item" 
+                            :value="item"></el-option>
                     </el-select>
 
-                    <el-input v-model="searchData.jobNumber" placeholder="工号" style="width:200px" v-if="checkList === '1'"></el-input>
+                    <el-input 
+                        style="width:200px"
+                        v-model="searchData.jobNumber" 
+                        placeholder="工号"
+                        clearable
+                        v-if="checkList === '1'"></el-input>
 
-                    <el-select v-model="groupList" placeholder="分组" style="width:200px" v-if="checkList === '2' || checkList === '3'">
+                    <el-select 
+                        style="width:200px"
+                        v-model="groupList" 
+                        placeholder="分组"
+                        clearable
+                        v-if="checkList === '2' || checkList === '3'">
                         <el-option v-for="item in options_group" :key="item.value" :label="item.label" :value="item.value"></el-option>
                     </el-select>
 
-                    <el-select v-model="tagList" placeholder="标签" style="width:200px" v-if="checkList === '2'">
+                    <el-select
+                        style="width:200px" 
+                        v-model="tagList" 
+                        placeholder="标签"
+                        clearable
+                        v-if="checkList === '2'">
                         <el-option v-for="item in options_tag" :key="item.value" :label="item.label" :value="item.value"></el-option>
                     </el-select>
 
-                    <el-input v-model="clientMess" placeholder="客户信息" style="width:200px" v-if="checkList === '2'"></el-input>
+                    <el-input
+                        style="width:200px" 
+                        v-model="clientMess" 
+                        placeholder="客户信息"
+                        clearable  
+                        v-if="checkList === '2'"></el-input>
 
-                    <el-input v-model="clientMess" placeholder="群信息" style="width:200px" v-if="checkList === '3'"></el-input>
+                    <el-input
+                        style="width:200px" 
+                        v-model="clientMess" 
+                        placeholder="群信息"
+                        clearable  
+                        v-if="checkList === '3'"></el-input>
 
+                    <el-button 
+                        style="width:120px"
+                        type="primary" 
+                        @click="getDataList()">搜索</el-button>
+                    
                 </div>
-
-                <el-button type="primary" style="width:120px" @click="getMessageList()">搜索</el-button>
-
             </div>
 
             <div class="item_table">
-                <el-table :data="tableData" style="width: 100%">
-                    <el-table-column width="180" :label="checkList === '1'?'员工微信':
-                      checkList === '2'? '客户微信':
-                        checkList === '3'?'群名称':''">
+                <el-table 
+                    :data="tableData"
+                >
+                    <el-table-column 
+                         
+                        :label="checkList === '1'?'员工微信':
+                            checkList === '2'? '客户微信':
+                                checkList === '3'?'群名称':''"
+                    >
                         <template slot-scope="scope">
                             <div class="table_wechat">
-                                <img class="table_img" :src="scope.row.avatar" />
+                                <div class="table_img">
+                                    <img v-if="scope.row.avatar" :src="scope.row.avatar" />
+                                    <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                </div>
+                                <!-- <img class="table_img" :src="scope.row.avatar" /> -->
                                 <div class="table_item">
                                     <div class="person_name">{{scope.row.name}}</div>
                                     <div class="wechat_no">{{scope.row.key}}</div>
@@ -66,9 +119,11 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column :label="checkList === '1'?'工号/姓名':
-                      checkList === '2'? '所属客服':
-                        checkList === '3'?'管理员':''" width="180">
+                    <el-table-column 
+                        :label="checkList === '1'?'工号/姓名':
+                            checkList === '2'? '所属客服':
+                                checkList === '3'?'管理员':''"
+                    >
                         <template slot-scope="scope">
                             <div class="table_staff">
                                 <div class="staff_no">{{scope.row.userid}}</div>
@@ -76,42 +131,80 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="departmentName" :label="checkList === '1'?'部门':'分组'">
-                    </el-table-column>
-                    <el-table-column v-if="checkList === '1' || checkList === '3'" prop="numberclient" label="客户数">
-                    </el-table-column>
-                    <el-table-column v-if="checkList === '2'" prop="groupchat" label="聊天数">
-                    </el-table-column>
-                    <el-table-column v-if="checkList === '1' || checkList === '2'" prop="groupchat" label="群聊数">
-                    </el-table-column>
-                    <el-table-column v-if="checkList === '1' || checkList === '2'" prop="gender" label="性别">
+                    <el-table-column 
+                        prop="departmentName" 
+                        :label="checkList === '1'?'部门':'分组'"
+                    ></el-table-column>
+                    <el-table-column 
+                        v-if="checkList === '1' || checkList === '3'" 
+                        prop="numberclient" 
+                        label="客户数"
+                    ></el-table-column>
+                    <el-table-column 
+                        v-if="checkList === '2'" 
+                        prop="groupchat" 
+                        label="聊天数"
+                    ></el-table-column>
+                    <el-table-column 
+                        v-if="checkList === '1' || checkList === '2'" 
+                        prop="groupchat" 
+                        label="群聊数"
+                    ></el-table-column>
+                    <el-table-column 
+                        v-if="checkList === '1' || checkList === '2'" 
+                        prop="gender" 
+                        label="性别"
+                    >
                         <template slot-scope="scope">
                             {{scope.row.gender === '1' ?'男':
                                 scope.row.gender === '2'?'女':''
                             }}
                         </template>
                     </el-table-column>
-                    <el-table-column v-if="checkList === '2'" prop="label" label="标签">
-                    </el-table-column>
-                    <el-table-column v-if="checkList === '3'" prop="sex" label="员工数">
-                    </el-table-column>
-                    <el-table-column v-if="checkList === '3'" prop="mark" label="备注">
-                    </el-table-column>
-                    <el-table-column label="聊天记录">
+                    <el-table-column 
+                        v-if="checkList === '2'" 
+                        prop="label" 
+                        label="标签"
+                    ></el-table-column>
+                    <el-table-column 
+                        v-if="checkList === '3'" 
+                        prop="sex" 
+                        label="员工数"
+                    ></el-table-column>
+                    <el-table-column 
+                        v-if="checkList === '3'" 
+                        prop="mark" 
+                        label="备注"
+                    ></el-table-column>
+                    <el-table-column 
+                        label="聊天记录"
+                    >
                         <template slot-scope="scope">
-                            <el-button type="primary" round width="120" @click="openDetail(scope.row)">查看</el-button>
+                            <el-button 
+                                type="primary" 
+                                round  
+                                @click="openDetail(scope.row)"
+                                v-loading.fullscreen.lock="fullscreenLoading"
+                            >查看</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
 
                 <!-- 分页 -->
-                <el-pagination background layout="prev, pager, next" :total="this.tablePage.pageTotal" :page-size="this.tablePage.pageSize" :current-page="this.tablePage.pageCurrent">
+                <el-pagination 
+                    background 
+                    layout="prev, pager, next" 
+                    :total="this.tablePage.pageTotal" 
+                    :page-size="this.tablePage.pageSize" 
+                    :current-page="this.tablePage.pageCurrent">
                 </el-pagination>
             </div>
         </div>
         <!-- 查询聊天记录 -->
         <div v-else>
-            <ChatRecord></ChatRecord>
+            <ChatRecord
+                searchInput="inputSearch"
+            ></ChatRecord>
         </div>
     </div>
 </template>
@@ -142,8 +235,7 @@ export default {
                 }
             ],
 
-            departList: "", // 部门列表
-            options_depart: [],
+            options_depart: [], // 部门
 
 
             groupList: "", // 分组列表
@@ -196,73 +288,77 @@ export default {
                 pageCurrent: 1 // 当前页数
             },
 
-            // 筛选条件
+            // 搜索筛选条件
             searchData: {
                 jobNumber: "", // 工号
                 departList:"", // 部门
-            }
+            },
+
+            fullscreenLoading: false, // 页面加载
 
         }
     },
     methods: {
 
-        // 多选框回调
-        handleRadioChange() {
-            console.log(this.checkList)
-        },
-
         // 跳转到对应详情
         openDetail(val) {
-            console.log(val.userid)
             this.$router.push({
                 name: 'Detail',
                 path: "/detail",
-                query: { userid: val.userid, name: val.name, type: this.checkList }
+                query: { 
+                    userid: val.userid, 
+                    name: val.name,
+                    departName: val.departmentName,
+                    type: this.checkList 
+                }
             });
+            // 页面加载
+            this.fullscreenLoading = true;
+            setTimeout(() => {
+                this.fullscreenLoading = false;
+            },2000);
         },
 
         // 聊天记录搜索
         handleInputSearch(e) {
-            console.log(e.target.value)
             this.inputSearch = e.target.value
         },
 
-        // 选择器
-        getData() {
-            this.$axios.post('/WxChat/GetDepartment').then((res) => {
-                this.options_depart = res.data.body;
-            })
+        // 获取部门  
+        getDepartList() {
+            // this.$axios.post('/WxChat/GetDepartment').then((res) => {
+            //     this.options_depart = res.data.body;
+            // })
         },
 
         // 获取列表
-        getMessageList() {
-            let data = {
-                "pageSize": 10,
-                "pageIndex": 1,
-                "sss":this.departList,
-                userid: this.searchData.jobNumber
-            }
-            this.$axios.post('/WxChat/GetUserChatList', data).then((res) => {
-                if (res.data.status === 0 && res.data.body.result.length > 0) {
-                    this.tableData = res.data.body.result
-                    this.tablePage = res.data.body
+        getDataList() {
+            // let data = {
+            //     pageSize: 10,
+            //     pageIndex: 1,
+            //     departmentName:this.searchData.departList,
+            //     userid: this.searchData.jobNumber,
+            // }
+            // this.$axios.post('/WxChat/GetUserChatList', data).then((res) => {
+            //     if (res.data.status === 0 && res.data.body.result.length > 0) {
+            //         this.tableData = res.data.body.result
+            //         this.tablePage = res.data.body
 
-                    // 表格页数
-                    this.tablePage.pageTotal = res.data.body.total
-                    this.tablePage.pageSize = res.data.body.pageSize
-                    this.tablePage.pageCurrent = res.data.body.pageIndex
-                } else {
-                    this.$message.error(res.data.message)
-                }
-                console.log('tableData', this.tableData)
-            })
+            //         // 表格页数
+            //         this.tablePage.pageTotal = res.data.body.total
+            //         this.tablePage.pageSize = res.data.body.pageSize
+            //         this.tablePage.pageCurrent = res.data.body.pageIndex
+            //     } else {
+            //         this.$message.error(res.data.message)
+            //     }
+            // })
         }
 
     },
 
     created() {
-        this.getMessageList()
-        this.getData()
+        // this.getDepartList()
+        // this.getDataList()
     }
 }
 </script>
@@ -274,7 +370,7 @@ export default {
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid #d0d0d0;
-        padding: 5px 40px;
+        padding: 10px 30px;
         .top_title {
             font-size: 16px;
             font-weight: bold;
@@ -283,10 +379,8 @@ export default {
         .top_action {
             /deep/.el-input__inner {
                 padding: 0 10px;
-                color: #888897;
                 border: 1px solid #bfbfbf;
-                border-radius: 7px;
-                height: 36px;
+                border-radius: 10px;
                 .el-input__suffix {
                     color: #101010;
                 }
@@ -294,20 +388,18 @@ export default {
         }
     }
     .content_item {
-        padding: 40px;
+        padding: 30px;
         .item_action {
             display: flex;
             align-items: center;
-            .action_radio {
-                margin-right: 10px;
-            }
             .action_item {
-                &:not(:last-child) {
-                    margin-right: 20px;
-                }
                 .el-select {
-                    margin-right: 20px;
+                    margin:0px 20px;
                 }
+                .el-input {
+                    margin: 0px 20px;
+                }
+                
             }
         }
         .item_table {
@@ -324,9 +416,21 @@ export default {
                     }
                 }
                 .table_img {
-                    width: 50px;
-                    height: 50px;
+                    width: 45px;
+                    height: 45px;
+                    background-color: lightgray;
                     margin-right: 10px;
+                    img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: contain;
+                    }
+                    .not_img {
+                        width: 100%;
+                        height: 100%;
+                        line-height: 45px;
+                        text-align: center;
+                    }
                 }
             }
             .table_staff {

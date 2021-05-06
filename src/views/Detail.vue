@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-04-29 11:52:13
+ * @LastEditTime: 2021-05-06 16:16:50
  * @LastEditors: mzr
 -->
 <template>
@@ -14,16 +14,17 @@
             <div class="content_left">
                 <div class="left_back" @click="goList()">
                     <div class="left_back_item">
-                        <div class="back_image"></div>
+                        <div class="back_image"><i class="element-icons el-icontupian1"></i></div>
                         <div class="back_explain">
                             <div class="explain_name">{{userMessage.name}}</div>
-                            <div class="explain_dep">信息中心</div>
+                            <div class="explain_dep">{{userMessage.departName}}</div>
                         </div>
                     </div>
                     <div class="right_icon">
-                        <i class="el-icon-arrow-right"></i>
+                        <i class="element-icons el-icondayuhao"></i>
                     </div>
                 </div>
+                <!-- 群列表 -->
                 <div v-if="status === '3'">
                     <div class="group_pane">
                         <el-tabs v-model="activeGroupName">
@@ -35,12 +36,21 @@
                                         :key="index"
                                     >
                                         <div class="item_top">
-                                            <img class="top_image" />
-                                            <div class="top_name">
-                                                <div class="first_name">{{item.firstName}}</div>
-                                                <div class="nick_name">{{item.staffNo}}</div>
+                                            <div class="top_div">
+                                                <div class="item_img">
+                                                    <img v-if="item.photoUrl" :src="item.photoUrl" />
+                                                    <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                                </div>
+                                                <div class="top_name">
+                                                    <div class="first_name">{{item.firstName}}</div>
+                                                    <div class="nick_name">{{item.staffNo}}</div>
+                                                </div>
                                             </div>
-                                           
+                                            <i :style="item.gender === '1'?'color: #1296db':'color:#d4237a'" class="element-icons el-iconcao-flat-sex"></i>  
+                                        </div>
+                                        <div class="item_bottom">
+                                            <div class="bottom_mark">{{item.depart}}</div>
+                                            <div class="bottom_whether">群主</div>
                                         </div>
                                     </div>
                                 </div>
@@ -70,13 +80,17 @@
                                         v-for="(item,index) in chatList" :key="index"
                                         @click="chatDetal()">
                                         <div class="list_item">
-                                            <img class="item_img" :src="item.photoUrl" />
+                                            <div class="item_img">
+                                                <img v-if="item.photoUrl" :src="item.photoUrl" />
+                                                <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                            </div>
+                                            
                                             <div class="item_right">
                                                 <div class="item_top">
-                                                    <div class="top_name">{{item.name}}</div>
-                                                    <div class="top_time">{{item.endTime}}</div>
+                                                    <div class="top_name">{{item.name}}美少女战士</div>
+                                                    <div class="top_time">{{item.endTime}}3-23</div>
                                                 </div>
-                                                <div class="item_bottom">{{item.endChatContent}}</div>
+                                                <div class="item_bottom">{{item.endChatContent}}图片信息</div>
                                             </div>
                                         </div>
                                     </div>
@@ -88,6 +102,7 @@
                     </div>
                 </div>
             </div>
+            <!--聊天对话框 -->
             <div class="content_right">
                 <div class="right_action">
                     <div class="right_action_item">
@@ -96,22 +111,33 @@
                         <div class="action_message"
                             v-if="status === '1'" 
                             @click="showTag = true"
-                        ><i class="el-icon-share"></i></div>
+                        ><i class="element-icons el-iconbiaoji"></i></div>
                     </div>
                     <div class="right_action_item">
-                        <div class="action_load" @click="showLoad = true"><i class="el-icon-download"></i>下载</div>
+                        <div class="action_load" 
+                            @click="showLoad = true"
+                        >
+                            <i class="el-icon-download"></i>
+                            <span>下载</span>
+                        </div>
                         <div class="action_search">
-                            <el-button slot="reference" type="primary" @click="showRecord = true">搜索记录</el-button>
+                            <el-button 
+                                slot="reference" 
+                                type="primary" 
+                                @click="showRecord = true"
+                            >搜索记录</el-button>
                         </div >
+                            
                         <div class="action_client" 
                             v-if="status === '2'"
                             @click="showGroup = true"
-                        ><i class="el-icon-user"></i></div>
+                        ><i class="element-icons el-iconqiweiqunchengyuan"></i></div>
                     </div>
                 </div>
-
                 <div class="right_content">
-                    <div class="content_date">2021-3-29 16:20</div>
+                    <div class="content_date">
+                        <div class="date_item">2021-3-29 16:20</div>
+                    </div>
                     <div v-for="(item, index) in recordList" :key="index" :class="item.type === 1?'left_message':'right_message'">
                         <!-- 发送方 -->
                         <div v-if="item.type === 2" class="sender_dialog_item">
@@ -119,11 +145,17 @@
                                 <p>{{item.name}} {{item.contentTime}}</p>
                                 <div class="sender_right_bubble">{{item.content}}</div>
                             </div>
-                            <img class="sender_item_pic" :src="item.photoUrl" />
+                            <div class="sender_item_pic">
+                                <img v-if="item.photoUrl" :src="item.photoUrl" />
+                                <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                            </div>
                         </div>
                         <!-- 接收方 -->
                         <div v-else class="dialog_item">
-                            <img class="item_pic" :src="item.photoUrl" />
+                            <div class="item_pic">
+                                <img v-if="item.photoUrl" :src="item.photoUrl" />
+                                <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                            </div>
                             <div class="item_right">
                                 <p>{{item.contentTime}} {{item.name}}</p>
                                 <div class="right_bubble">{{item.content}}</div>
@@ -142,9 +174,15 @@
         <!--
             ------------员工------------ 
             标记内容对话框-->  
-        <el-dialog custom-class="tagDialog" title="添加标记内容" :visible.sync="showTag" width="30%">
+        <el-dialog custom-class="tagDialog" title="添加标记内容" :visible.sync="showTag" width="20%">
             <div class="tag_dialog">
-                <el-input placeholder="多行输入" v-model="tagContent" clearable></el-input>
+                <el-input
+                    type="textarea" 
+                    :rows="6"
+                    placeholder="多行输入" 
+                    v-model="tagContent" 
+                    clearable
+                ></el-input>
             </div>
             <span slot="footer" class="dialog-footer" center>
                 <el-button @click="showTag = false">取 消</el-button>
@@ -155,7 +193,7 @@
         <!-- 
             ------------员工------------
             下载聊天记录对话框 -->
-        <el-dialog custom-class="loadDialog" title="下载聊天记录" :visible.sync="showLoad" width="30%">
+        <el-dialog custom-class="loadDialog" title="下载聊天记录" :visible.sync="showLoad" width="20%">
             <div class="load_dialog">
                 <el-date-picker v-model="starTime" type="date" placeholder="开始日期"></el-date-picker> -
 
@@ -190,13 +228,25 @@
                 <div class="record_tags">
                     <el-tabs v-model="activeRecordName">
                         <el-tab-pane label="日历" name="calendar">
-                            <el-calendar v-model="calendarValue"></el-calendar>
+                            <el-calendar 
+                                class="record_calendar"
+                                v-model="calendarValue">
+                                <template
+                                    slot="dateCell"
+                                    slot-scope="{data}"
+                                >
+                                    <p>{{data.day.split('-').slice(2).join()}}</p>
+                                    <div v-for="(item,index) in dayTime" :key="index">
+                                        <div v-if="data.day === item" class="item_dotted"></div>
+                                    </div>
+                                </template>
+                            </el-calendar>
                         </el-tab-pane>
                         <el-tab-pane label="图片/视频" name="picture">
                             <div class="record_tags_image">
                                 <div class="image_date">2021-3-26</div>
-                                <div class="image_list" v-for="(item,index) in picList" :key="index">
-                                    <div class="image_item">
+                                <div class="image_list">
+                                    <div class="image_item" v-for="(item,index) in picList" :key="index">
                                         <div class="image_self"></div>
                                         <div class="image_source">{{item.person}}</div>
                                     </div>
@@ -254,9 +304,28 @@
                     </el-radio-group>
                 </div>
                 <div class="group_list">
-                    <div class="list_item">
-                        
-                    </div>
+                    <div class="staff_list_item"
+                        v-for="(item,index) in groupList"
+                        :key="index"
+                    >
+                        <div class="item_top">
+                            <div class="top_div">
+                                <div class="item_img">
+                                    <img v-if="item.photoUrl" :src="item.photoUrl" />
+                                    <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                </div>
+                                <div class="top_name">
+                                    <div class="first_name">{{item.firstName}}</div>
+                                    <div class="nick_name">{{item.staffNo}}</div>
+                                </div>
+                            </div>
+                            <i :style="item.gender === '1'?'color: #1296db':'color:#d4237a'" class="element-icons el-iconcao-flat-sex"></i>  
+                        </div>
+                        <div class="item_bottom">
+                            <div class="bottom_mark">{{item.depart}}</div>
+                            <div class="bottom_whether">群主</div>
+                        </div>
+                    </div> 
                 </div>
             </div>
         </el-dialog>
@@ -276,7 +345,7 @@ export default {
             recordSearch: "", // 搜索记录对话框搜索值
 
             activeName: "all", // 标签页
-            activeGroupName: "staff", // 群  标签页
+            activeGroupName: "staff", // 群  标签页  
             activeRecordName: "calendar", // 搜索记录 标签页
 
 
@@ -286,6 +355,7 @@ export default {
             showGroup:  false, // 群成员对话框
 
             calendarValue: new Date(), // 日历
+            dayTime:["2021-05-05","2021-05-06","2021-05-07"],
 
             starTime: "", // 下载聊天记录  开始时间
             endTime: "", // 下载聊天记录 结束时间 
@@ -308,6 +378,16 @@ export default {
                     staffNo:"7915", // 工号
                     label:"重要客户", // 客户 标签
                     depart:"信息中心",
+                    photoUrl:"", // 头像
+                    gender:"1", // 1为男
+                },
+                {   
+                    firstName:"岚", // 姓名
+                    staffNo:"7915", // 工号
+                    label:"重要客户", // 客户 标签
+                    depart:"信息中心",
+                    photoUrl:"", // 头像
+                    gender:"2", // 性别
                 }
             ],
 
@@ -370,6 +450,12 @@ export default {
                 },
                 {
                     person: "美少女战士"
+                },
+                 {
+                    person: "美少女战士"
+                },
+                 {
+                    person: "美少女战士"
                 }
             ]
         }
@@ -380,6 +466,22 @@ export default {
             this.$router.go(-1);
         },
 
+        // 获取聊天列表
+        getChatList() {
+
+            // this.userMessage = this.$route.query // 用户信息
+            // let data = {
+            //     from: this.userMessage.userid,
+            //     groupchat: 'GROUP'
+            // }
+            // this.$axios.post('/WxChat/GetUserList',data).then((res) => {
+            //     if(res.data.status === 0 && res.data.body.length > 0) {
+            //         this.chatList = res.data.body
+            //     }else {
+            //         this.$message.error(res.data.message)
+            //     }
+            // })
+        },
         // 获取聊天记录
         chatDetal() {
             // let data = {
@@ -402,19 +504,8 @@ export default {
     created() {
 
         this.status = this.$route.query.type // 聊天记录类型
-        this.userMessage = this.$route.query // 用户信息
-   
-        // let data = {
-        //     from: this.userMessage.userid
-        // }
-        // this.$axios.post('/WxChat/GetUserList',data).then((res) => {
-        //     if(res.data.status === 0 && res.data.body.length > 0) {
-        //         this.chatList = res.data.body
-        //     }else {
-        //         this.$message.error(res.data.message)
-        //     }
-        // })
-    }
+        // this.getChatList() 
+    }   
 }
 </script>
 
@@ -422,10 +513,11 @@ export default {
 .detail {
     height: calc(100vh - 60px);
     .detail_top {
-        padding: 17px;
+        padding: 10px 30px;
         border-bottom: 1px solid #d0d0d0;
         .top_title {
             font-size: 16px;
+            line-height: 40px;
             font-weight: bold;
             color: #101010;
         }
@@ -441,21 +533,24 @@ export default {
                 justify-content: space-between;
                 align-items: center;
                 padding: 17px;
-                border-bottom: 1px solid #d0d0d0;
                 cursor: pointer;
                 .left_back_item {
                     display: inline-flex;
                     .back_image {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                         width: 45px;
                         height: 45px;
                         background-color: lightgray;
-                        text-align: center;
+                        
                     }
                     .back_explain {
                         margin-left: 10px;
                         .explain_name {
+                            font-size: 15px;
                             font-weight: bold;
-                            padding-bottom: 6px;
+                            margin-bottom: 10px;
                         }
                         .explain_dep {
                             font-size: 10px;
@@ -471,7 +566,12 @@ export default {
                 align-items: center;
                 background-color: lightgray;
                 span {
-                    font-size: 14px;
+                    font-size: 15px;
+                    font-weight: 400;
+                    cursor: pointer;
+                }
+                .el-input__inner {
+                    height:36px;
                 }
             }
             .left_tabs {
@@ -499,6 +599,17 @@ export default {
                                 width: 60px;
                                 height: 60px;
                                 background-color: lightgray;
+                                img{
+                                    width: 100%;
+                                    height: 100%;
+                                    object-fit: contain;
+                                }
+                                .not_img{
+                                    width: 100%;
+                                    height: 100%;
+                                    text-align: center;
+                                    line-height: 60px;
+                                }
                             }
                             .item_right {
                                 width: 80%;
@@ -528,6 +639,16 @@ export default {
                 }
                 /deep/ .el-tabs__item {
                     padding: 0 33px;
+                    color: #999;
+                }
+                /deep/.el-tabs__active-bar {
+                    height: 4px;
+                    border-radius: 5px;
+                    background-color: #407bff;
+                }
+                /deep/ .el-tabs__item.is-active {
+                    color: #333;
+                    font-weight: bold;
                 }
                 /deep/ .el-tabs--bottom .el-tabs__item.is-bottom:nth-child(2),
                 .el-tabs--bottom .el-tabs__item.is-top:nth-child(2),
@@ -540,7 +661,9 @@ export default {
             .group_pane {
 
                 /deep/ .el-tabs__item {
-                    padding: 0 33px;
+                    padding: 15px 69px;
+                    height: 55px;
+                    color: #999;
                 }
                 /deep/ .el-tabs--bottom .el-tabs__item.is-bottom:nth-child(2),
                 .el-tabs--bottom .el-tabs__item.is-top:nth-child(2),
@@ -548,9 +671,90 @@ export default {
                 .el-tabs--top .el-tabs__item.is-top:nth-child(2) {
                     padding-left: none;
                 }
-                .staff_content_list {
-                    .staff_list_item {
+                /deep/ .el-tabs__nav-wrap.is-scrollable {
+                    padding: 0;
+                    .el-tabs__nav-prev {
+                        display: none;
+                    }
+                    .el-tabs__nav-next {
+                        display: none;
+                    }
+                }
+                /deep/ .el-tabs__item.is-active {
+                    color: #333;
+                    font-weight:bold;
+                }
+                /deep/ .el-tabs__active-bar {
+                    
+                    width: 48px;
+                    height: 4px;
+                    border-radius: 5px;
+                    background-color: #407bff;
+                    
+                }
 
+                .staff_content_list {
+                    span {
+                        font-size: 10px;
+                        color: lightgray;
+                        padding-left: 15px;
+                    }
+                    .staff_list_item {
+                        padding: 15px 15px 0px;
+                        border-bottom: 2px solid #E4E7ED;
+                        .item_top {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            .top_div {
+                                display: flex;
+                                .item_img {
+                                    width: 45px;
+                                    height: 45px;
+                                    background-color: lightgray;
+                                    img{
+                                        width: 100%;
+                                        height: 100%;
+                                        object-fit: contain;
+                                    }
+                                    .not_img{
+                                        width: 100%;
+                                        height: 100%;
+                                        text-align: center;
+                                        line-height: 45px;
+                                    }
+                                }
+                                .top_name {
+                                    margin-left: 10px;
+                                    .first_name {
+                                        font-size: 17px;
+                                        font-weight: bold;
+                                    }
+                                    .nick_name {
+                                        font-size: 16px;
+                                        color: lightgray;
+                                    }
+                                }
+                            }
+                        }
+                        .item_bottom {
+                            display:flex;
+                            justify-content: space-between;
+                            align-items: flex-end;
+                            margin: 10px 0px 10px;
+                            .bottom_mark {
+                                font-size:12px;
+                                font-weight:bold;
+                            }
+                            .bottom_whether {
+                                color: #557b08;
+                                background-color: #c4e2c9;
+                                border-radius: 5px;
+                                font-size: 12px;
+                                line-height: 12px;
+                                padding: 5px;
+                            }
+                        }
                     }
                 }  
             }
@@ -560,7 +764,7 @@ export default {
             .right_action {
                 display: flex;
                 justify-content: space-between;
-                padding: 5px 19px;
+                padding: 13px 18px;
                 border-bottom: 1px solid #d0d0d0;
                 .right_action_item {
                     display: flex;
@@ -583,10 +787,19 @@ export default {
                     .action_load {
                         cursor: pointer;
                         margin-right: 20px;
+                        span {
+                            font-size: 12px;
+                        }
+                    }
+                    .action_search {
+                        .el-button {
+                            padding: 5px 10px;
+                        }
                     }
                     .action_client {
                         cursor: pointer;
                         margin-left: 20px;
+                        color: #1296db;
                     }
                 }
             }
@@ -595,11 +808,15 @@ export default {
                 overflow-y: auto;
                 height: calc(100vh - 167px);
                 .content_date {
-                    color: lightgrey;
-                    font-size: 10px;
                     display: flex;
                     justify-content: center;
-                    padding-top:15px;
+                    margin-top:15px;
+                    .date_item {
+                        color: darkgray;
+                        font-size: 10px;
+                        background-color: lightgray;
+                        padding: 2px 5px;
+                    }
                 }
                 .left_message {
                     .dialog_item {
@@ -612,6 +829,17 @@ export default {
                             background-color: lightgray;
                             margin-right: 10px;
                             margin-bottom: 20px;
+                            img {
+                                width: 100%;
+                                height: 100%;
+                                object-fit: contain;
+                            }
+                            .not_img {
+                                width: 100%;
+                                height: 100%;
+                                line-height: 45px;
+                                text-align: center;
+                            }
                         }
                         .item_right {
                             p {
@@ -654,6 +882,17 @@ export default {
                             height: 45px;
                             background-color: lightgray;
                             margin-left: 10px;
+                            img {
+                                width: 100%;
+                                height: 100%;
+                                object-fit: contain;
+                            }
+                            .not_img {
+                                width: 100%;
+                                height: 100%;
+                                text-align: center;
+                                line-height: 45px;
+                            }
                         }
                         .sender_item_right {
                             p {
@@ -684,14 +923,16 @@ export default {
         }
     }
 
-    /deep/.el-dialog__footer {
-        text-align: center;
-    }
     // 标记内容对话框
     .tagDialog {
+       
     }
     // 下载记录对话框
     .loadDialog {
+        .el-date-editor.el-input, 
+        .el-date-editor.el-input__inner {
+            width: 160px;
+        }
     }
     // 聊天记录对话框
     .recordDialog {
@@ -712,6 +953,7 @@ export default {
                     }
                 }
                 .record_tags {
+                    padding: 15px;
                     .record_tags_file {
                         padding: 14px 33px;
                         .file_date {
@@ -777,7 +1019,11 @@ export default {
                         .image_list {
                             display: flex;
                             width: 100%;
+                            :not(:last-child) {
+                                margin-right: 26px;
+                            }
                             .image_item {
+                                flex: 1;
                                 .image_self {
                                     width: 180px;
                                     height: 100px;
@@ -790,8 +1036,19 @@ export default {
                             }
                         }
                     }
-
-                   
+                    // 标签栏
+                    /deep/ .el-tabs {
+                        .el-tabs__nav-wrap{
+                            &::after {
+                                display: none;
+                            }
+                        }
+                    }
+                    /deep/ .el-tabs__active-bar {
+                        height: 4px;
+                        border-radius: 5px;
+                        background-color: #407bff;
+                    }
                     /deep/
                         .el-tabs--bottom
                         .el-tabs__item.is-bottom:nth-child(2),
@@ -802,13 +1059,37 @@ export default {
                     }
                     /deep/ .el-tabs__item {
                         padding: 0 42px;
+                        color: #999;
                     }
-
+                    /deep/ .el-tabs__item.is-active {
+                        color: #333;
+                        font-weight: bold;
+                    }
                     /deep/ .el-dialog {
                         margin-top:36vh;
                         margin-right: 5vh;
                     }
-                   
+                    // 日历表
+                    /deep/ .el-calendar {
+                        .el-calendar__body {
+                            .el-calendar-day {
+                                height: 50px;
+                            }
+                        }
+                    }
+                    .record_calendar {
+                        p {
+                            margin: 9px 0px 0px 13px;
+                        }
+                        .item_dotted {
+                            width: 8px;
+                            height: 8px;
+                            border-radius: 50%;
+                            background-color: #1296db;
+                            margin-left: 39px;
+                            margin-top: -31px;
+                        }
+                    }
                 }
             }
         }
@@ -819,12 +1100,72 @@ export default {
             .group_radio {
                 display: flex;
                 justify-content: center;
-                .el-radio-button__inner {
+                /deep/.el-radio-button__inner {
                         padding: 12px 58px;
+                }
+                /deep/ .el-tabs__nav-wrap.is-scrollable {
+                    padding: 0;
                 }
             }
             .group_list {
-
+                margin-top: 20px;
+                .staff_list_item {
+                        padding: 15px 15px 0px;
+                        border-top: 2px solid #E4E7ED;
+                        .item_top {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            .top_div {
+                                display: flex;
+                                .item_img {
+                                    width: 45px;
+                                    height: 45px;
+                                    background-color: lightgray;
+                                    img{
+                                        width: 100%;
+                                        height: 100%;
+                                        object-fit: contain;
+                                    }
+                                    .not_img{
+                                        width: 100%;
+                                        height: 100%;
+                                        text-align: center;
+                                        line-height: 45px;
+                                    }
+                                }
+                                .top_name {
+                                    margin-left: 10px;
+                                    .first_name {
+                                        font-size: 17px;
+                                        font-weight: bold;
+                                    }
+                                    .nick_name {
+                                        font-size: 16px;
+                                        color: lightgray;
+                                    }
+                                }
+                            }
+                        }
+                        .item_bottom {
+                            display:flex;
+                            justify-content: space-between;
+                            align-items: flex-end;
+                            margin: 10px 0px 10px;
+                            .bottom_mark {
+                                font-size:12px;
+                                font-weight:bold;
+                            }
+                            .bottom_whether {
+                                color: #557b08;
+                                background-color: #c4e2c9;
+                                border-radius: 5px;
+                                font-size: 12px;
+                                line-height: 12px;
+                                padding: 5px;
+                            }
+                        }
+                }
             }
         }
     }
