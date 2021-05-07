@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-05-06 16:16:50
+ * @LastEditTime: 2021-05-07 11:01:43
  * @LastEditors: mzr
 -->
 <template>
@@ -212,8 +212,7 @@
             custom-class="recordDialog" 
             title="搜索聊天记录" 
             :visible.sync="showRecord" 
-            width="30%" 
-            height="80%"
+            width="30%"
             :modal='false'
             >
             <div class="record_dialog">
@@ -247,7 +246,10 @@
                                 <div class="image_date">2021-3-26</div>
                                 <div class="image_list">
                                     <div class="image_item" v-for="(item,index) in picList" :key="index">
-                                        <div class="image_self"></div>
+                                        <div class="image_self">
+                                            <img v-if="item.photoUrl" :src="item.photoUrl" />
+                                            <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                        </div>
                                         <div class="image_source">{{item.person}}</div>
                                     </div>
                                 </div>
@@ -292,8 +294,7 @@
             custom-class="groupDialog" 
             title="查看群成员" 
             :visible.sync="showGroup" 
-            width="30%" 
-            height="80%"
+            width="30%"
             :modal='false'
             >
             <div class="group_dialog">
@@ -415,13 +416,69 @@ export default {
 
             // 聊天记录界面
             recordList: [
+                // {
+                //     name:"", // 姓名
+                //     type:"", // 发送方 1  接收方 2
+                //     contentTime:"", // 时间
+                //     content:"", // 内容
+                //     photoUrl:"", // 头像图片
+                // }
+                        {
+                    name:"多啦爱梦",
+                    type:1,
+                    contentTime:"16.20",
+                    content:"嗨，你好！",
+
+                },
                 {
-                    name:"", // 姓名
-                    type:"", // 发送方 1  接收方 2
-                    contentTime:"", // 时间
-                    content:"", // 内容
-                    photoUrl:"", // 头像图片
-                }
+                    name:"美少女战士",
+                    type:2,
+                    contentTime:"16.21",
+                    content:"你好！",
+
+                },
+                {
+                    name:"多啦爱梦",
+                    type:1,
+                    contentTime:"16.21",
+                    content:"美少女战士，认识你很高兴！",
+
+                },
+                {
+                    name:"美少女战士",
+                    type:2,
+                    contentTime:"16.21",
+                    content:"有多高兴？",
+
+                },
+                {
+                    name:"美少女战士",
+                    type:2,
+                    contentTime:"16.22",
+                    content:"哈哈，我也很高兴认识你",
+
+                },
+                {
+                    name:"美少女战士",
+                    type:2,
+                    contentTime:"16.23",
+                    content:"我想预定4月28号。重庆飞往西双版纳的机票",
+
+                },
+                {
+                    name:"美少女战士",
+                    type:2,
+                    contentTime:"16.23",
+                    content:"有儿童",
+
+                },
+                {
+                    name:"多啦爱梦",
+                    type:1,
+                    contentTime:"16.24",
+                    content:"好的",
+
+                },
             ],
 
             // 链接列表
@@ -446,16 +503,20 @@ export default {
             // 图片视频
             picList: [
                 {
-                    person: "美少女战士"
+                    person: "美少女战士",
+                    photoUrl: ""
                 },
                 {
-                    person: "美少女战士"
+                    person: "美少女战士",
+                    photoUrl: ""
                 },
                  {
-                    person: "美少女战士"
+                    person: "美少女战士",
+                    photoUrl: ""
                 },
                  {
-                    person: "美少女战士"
+                    person: "美少女战士",
+                    photoUrl: ""
                 }
             ]
         }
@@ -874,8 +935,8 @@ export default {
                     text-align: right;
                     .sender_dialog_item {
                         display: flex;
-                        // align-items: flex-end;
-                        // justify-content: flex-end;
+                        align-items: flex-end;
+                        justify-content: flex-end;
                         padding: 15px;
                         .sender_item_pic {
                             width: 45px;
@@ -1015,19 +1076,32 @@ export default {
                     .record_tags_image {
                         padding: 14px 33px;
                         .image_date {
+                            margin-bottom: 10px;
                         }
                         .image_list {
                             display: flex;
+                            flex-wrap: wrap;
                             width: 100%;
                             :not(:last-child) {
                                 margin-right: 26px;
                             }
                             .image_item {
-                                flex: 1;
+                                
                                 .image_self {
-                                    width: 180px;
+                                    width: 156px;
                                     height: 100px;
                                     background-color: lightgray;
+                                    img {
+                                        width: 100%;
+                                        height: 100%;
+                                        object-fit: contain;
+                                    }
+                                    .not_img {
+                                        width: 100%;
+                                        height: 100%;
+                                        line-height:100px;
+                                        text-align: center;
+                                    }
                                 }
                                 .image_source {
                                     font-size: 10px;

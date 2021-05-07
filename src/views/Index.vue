@@ -2,7 +2,7 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-05-06 09:43:10
+ * @LastEditTime: 2021-05-06 16:52:50
  * @LastEditors: mzr
 -->
 
@@ -111,7 +111,6 @@
                                     <img v-if="scope.row.avatar" :src="scope.row.avatar" />
                                     <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
                                 </div>
-                                <!-- <img class="table_img" :src="scope.row.avatar" /> -->
                                 <div class="table_item">
                                     <div class="person_name">{{scope.row.name}}</div>
                                     <div class="wechat_no">{{scope.row.key}}</div>
@@ -203,7 +202,7 @@
         <!-- 查询聊天记录 -->
         <div v-else>
             <ChatRecord
-                searchInput="inputSearch"
+                :inputSearch="inputSearch"
             ></ChatRecord>
         </div>
     </div>
