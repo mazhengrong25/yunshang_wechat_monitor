@@ -25,7 +25,7 @@ img {
   height: 100%;
 }
 .el-container {
-  height: calc(40vh);
+  height: 100vh;
 }
 .el-container .el-header {
   padding: 0;
@@ -42,4 +42,7 @@ img {
 }
 .el-dialog__footer .dialog-footer .el-button--default {
   background-color: lightgray;
+}
+.el-table thead {
+  color: #333;
 }

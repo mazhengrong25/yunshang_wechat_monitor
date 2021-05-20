@@ -2,8 +2,8 @@
  * @Description: 导航栏
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 15:12:11
- * @LastEditTime: 2021-04-15 16:00:29
- * @LastEditors: wish.WuJunLong
+ * @LastEditTime: 2021-05-18 14:39:24
+ * @LastEditors: mzr
 -->
 <template>
   <div class="global_header">
@@ -34,7 +34,7 @@ export default {
 <style lang="less" scoped>
 .global_header {
   height: 100%;
-  background: #545c64;
+  background: #0070E2;
   display: flex;
   align-items: center;
   padding: 0 24px;

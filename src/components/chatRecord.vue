@@ -2,21 +2,22 @@
  * @Description: 聊天存档列表 ---- 聊天记录
  * @Author: mzr
  * @Date: 2021-04-28 14:27:48
- * @LastEditTime: 2021-05-07 09:52:37
+ * @LastEditTime: 2021-05-18 16:32:46
  * @LastEditors: mzr
 -->
 <template>
   <div class="chat_record">
       <div class="record_top">
-          <div class="top_action"><el-checkbox v-model="checkAction">只看员工发送</el-checkbox></div>
-          <div class="top_total">共有{{recordList.length}}条"{{inputSearch}}"相关记录</div>
+          <div class="top_action"><el-checkbox v-model="checkAction" @change="checkChange">只看员工发送</el-checkbox></div>
+          <div class="top_total">共有{{tablePage.pageTotal}}条"{{inputSearch}}"相关记录</div>
       </div>
+      <!-- 列表 -->
       <div class="record_list">
            <el-table
                 :data="recordList"
             >
                 <el-table-column
-                    prop="sender"
+                    min-width="50%"
                     label="发送人">
                     <template slot-scope="scope">
                         <div class="table_wechat">
@@ -25,35 +26,42 @@
                                 <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
                             </div>
                             <div class="table_item">
-                                <div class="person_name">{{scope.row.senderName}}</div>
-                                <div class="wechat_no">{{scope.row.senderWechat}}</div>
+                                <div class="person_name">{{scope.row.name}}</div>
+                                <div class="wechat_no">{{scope.row.userid}}</div>
                             </div>
                         </div>
                     </template>
                 </el-table-column>
                 <el-table-column
-                    prop="senderType"
+                    prop="sendType"
                     label="发送人类型"
+                    min-width="40%"
                 >
                 </el-table-column>
                 <el-table-column
                     prop="chatType"
-                    label="聊天类型">
+                    label="聊天类型"
+                    min-width="40%"
+                >
                 </el-table-column>
                 <el-table-column
-                    prop="chatContent"
                     label="消息内容"
                     >
+                    <template slot-scope="scope">
+                        <div class="table_message">
+                            <span v-for="(item, index) in scope.row.chatContent.split(inputSearch)" :key="index">{{item}}<span style="color: #409eff" v-if="index < scope.row.chatContent.split(inputSearch).length - 1">{{inputSearch}}</span></span>
+                        </div>
+                    </template>
                 </el-table-column>
                 <el-table-column
-                    label="操作"    
+                    label="操作"
+                    min-width="30%"
                 >
-                    <template>
+                    <template slot-scope="scope">
                         <el-button 
                             type="primary" 
-                            round 
-                            width="120"
-                            @click="showDetail = true"
+                            round
+                            @click="openDetail(scope.row)"
                             >详情</el-button>
                     </template>
                 </el-table-column>
@@ -62,7 +70,11 @@
             <el-pagination
                 background
                 layout="prev, pager, next" 
-                :total="50">
+                :total="tablePage.pageTotal" 
+                :page-size.sync="tablePage.pageSize" 
+                :current-page.sync="tablePage.pageCurrent"
+                @current-change="changePageIndex"
+            >
             </el-pagination>
       </div>
 
@@ -70,14 +82,14 @@
       <el-dialog
         custom-class="chatDialog" 
         :visible.sync="showDetail"
-        width="45%"
+        width="800px"
         >
             <div slot="title" class="chat_dialog">
                 <div class="title_img">
-                    <img v-if="recordList.photoUrl" :src="recordList.photoUrl" />
+                    <img v-if="detailMessage.photoUrl" :src="detailMessage.photoUrl" />
                     <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
                 </div>
-                <span>{{recordList.senderName}}</span>
+                <div class="title_content">{{detailMessage.name}}</div>
             </div>
             <!-- 内容 -->
             <div class="dialog_content">
@@ -116,6 +128,7 @@
 <script>
 export default {
     props: {
+        // 搜索值
         inputSearch: {
             type: String,
             default: () => "",
@@ -128,34 +141,16 @@ export default {
 
             showDetail: false, // 聊天记录对话框
 
-            // 聊天记录列表
-            recordList: [
-                {
-                    senderName:"美少女战士",
-                    senderWechat:"54564511YYY",
-                    senderType:"客户",
-                    chatType:"私聊",
-                    chatContent:"要不要一起出去旅游，哈哈哈哈",
-                    photoUrl:""
-                },
-                 {
-                    senderName:"美少女战士",
-                    senderWechat:"54564511YYY",
-                    senderType:"客户",
-                    chatType:"私聊",
-                    chatContent:"要不要一起出去旅游，哈哈哈哈",
-                    photoUrl:""
-                },
-                 {
-                    senderName:"美少女战士",
-                    senderWechat:"54564511YYY",
-                    senderType:"客户",
-                    chatType:"私聊",
-                    chatContent:"要不要一起出去旅游，哈哈哈哈",
-                    photoUrl:""
-                }
+            
+            recordList: [], // 聊天记录列表
 
-            ],
+            tablePage: {
+                pageTotal: 0,  // 表格总数
+                pageSize: 8, // 每页大小
+                pageCurrent: 1 // 当前页数
+            },
+
+            detailMessage: {}, //对话框表头
 
             // 聊天记录详情
             detailData:[
@@ -216,14 +211,58 @@ export default {
 
                 },
 
-            ]
+            ], 
+
         }
     },
     methods:{
-        
+
+        // 只查看员工发送
+        checkChange(e) {
+           
+            this.recordList.sendType = '员工'
+            this.getChatList();
+            
+        },
+
+        // 进入详情
+        openDetail(val) {
+            this.showDetail = true;
+            this.detailMessage = val
+        },
+
+        // 获取列表
+        getChatList() {
+            let data = {
+                pageIndex:this.tablePage.pageCurrent,
+                pageSize:this.tablePage.pageSize,
+                // isStaff:this.checkAction,
+                search:"好的",
+            }
+            this.$axios.post('/WxChat/GetChatSearchList',data).then((res) => {
+                
+                if(res.data.status === 0 && res.data.body.result.length > 0) {
+                    
+                    this.recordList = res.data.body.result
+                    this.tablePage = res.data.body
+                     // 表格页数
+                    this.tablePage.pageTotal = res.data.body.total
+                    this.tablePage.pageSize = res.data.body.pageSize
+                    this.tablePage.pageCurrent = res.data.body.pageIndex
+                }else {
+                    this.$message.error(res.data.message)
+                }
+            })
+        },
+
+        // 表格翻页
+        changePageIndex(){
+            this.getChatList()
+        },
+
     },
     created() {
-
+        this.getChatList()
     }
 }
 </script>
@@ -236,7 +275,7 @@ export default {
         padding:25px 38px;
         .top_total {
             font-size: 10px;
-            color: lightgray;
+            color: #999;
             margin-left: 35%;
         }
     }
@@ -276,11 +315,22 @@ export default {
             margin: 20px 15px;
         }
         }
-
+        .table_message {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
         // 页数
         .el-pagination {
             text-align: right;
             margin: 20px 15px;
+        }
+        // 详情按钮样式
+        /deep/ .el-button {
+           
+            width: 96px;
+            height: 38px;
+            
         }
 
     }
@@ -307,8 +357,8 @@ export default {
                     text-align: center;
                 }
             }
-            span {
-
+            .title_content {
+                font-size: 16px;
             }
         }
         .el-dialog__header {

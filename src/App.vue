@@ -1,3 +1,10 @@
+<!--
+ * @Description: 
+ * @Author: mzr
+ * @Date: 2021-04-16 10:22:50
+ * @LastEditTime: 2021-05-07 11:52:54
+ * @LastEditors: mzr
+-->
 <template>
   <div id="weChatMonitor">
     <el-container>
@@ -26,4 +33,10 @@ export default {
 };
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.el-container {
+    .el-main {
+      overflow: hidden;
+    }
+}
+</style>
