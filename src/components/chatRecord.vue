@@ -2,7 +2,7 @@
  * @Description: 聊天存档列表 ---- 聊天记录
  * @Author: mzr
  * @Date: 2021-04-28 14:27:48
- * @LastEditTime: 2021-05-18 16:32:46
+ * @LastEditTime: 2021-05-25 16:26:46
  * @LastEditors: mzr
 -->
 <template>
@@ -93,15 +93,20 @@
             </div>
             <!-- 内容 -->
             <div class="dialog_content">
-                <div class="content_date">
+                <!-- <div class="content_date">
                     <div class="date_item">2021-3-29 16:20</div>
-                </div>
-                <div v-for="(item, index) in detailData" :key="index" :class="item.type === 1?'left_message':'right_message'">
+                </div> -->
+                <div v-for="(item, index) in chatList" :key="index" :class="item.type === 1?'left_message':'right_message'">
                     <!-- 发送方 -->
                     <div v-if="item.type === 2" class="sender_dialog_item">
                         <div class="sender_item_right">
                             <p>{{item.name}} {{item.contentTime}}</p>
-                            <div class="sender_right_bubble">{{item.content}}</div>
+                            <div :class="item.contentType === 'emotion' || item.contentType === 'image' ?'sender_right_bubble not_background':'sender_right_bubble'">
+                                <div class="withdraw" v-if="item.contentType === 'revoke'">此消息已撤回</div>
+                                <DialogForward v-if="item.contentType === 'mixed'" :dialogList="item"></DialogForward>
+                                <el-image :z-index="2500" v-else-if="item.contentType === 'image' || item.contentType === 'emotion'" fit="contain" :src="$imgUrl + JSON.parse(item.content).resourcePath" :style="item.contentType === 'emotion' ? `max-width:${JSON.parse(item.content).width}px;max-height:${JSON.parse(item.content).height}px`:''" :preview-src-list="[$imgUrl + JSON.parse(item.content).resourcePath]"></el-image>
+                                <div v-else>{{item.content}}</div>
+                            </div>
                         </div>
                         <div class="sender_item_pic">
                             <img v-if="item.photoUrl" :src="item.photoUrl" />
@@ -116,7 +121,12 @@
                         </div>
                         <div class="item_right">
                             <p>{{item.contentTime}} {{item.name}}</p>
-                            <div class="right_bubble">{{item.content}}</div>
+                            <div :class="item.contentType === 'emotion' || item.contentType === 'image' ?'right_bubble not_background':'right_bubble'">
+                                <DialogForward v-if="item.contentType === 'mixed'" :dialogList="item"></DialogForward>
+                                <el-image :z-index="2500" v-else-if="item.contentType === 'image' || item.contentType === 'emotion'" fit="contain" :src="$imgUrl + JSON.parse(item.content).resourcePath" :style="item.contentType === 'emotion' ? `max-width:${JSON.parse(item.content).width}px;max-height:${JSON.parse(item.content).height}px`:''" :preview-src-list="[$imgUrl + JSON.parse(item.content).resourcePath]"></el-image>
+                                <div v-else>{{item.content}}</div>
+                                <div class="withdraw" v-if="item.contentType === 'revoke'">此消息已撤回</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -135,6 +145,9 @@ export default {
         }
 
     },
+    components: {
+        DialogForward: () => import("../components/dialogForward"),  // 转发对话框
+    },
     data() {
         return {
             checkAction: false, // 多选框状态
@@ -152,66 +165,7 @@ export default {
 
             detailMessage: {}, //对话框表头
 
-            // 聊天记录详情
-            detailData:[
-                {
-                    name:"多啦爱梦",
-                    type:1,
-                    contentTime:"16.20",
-                    content:"嗨，你好！",
-
-                },
-                {
-                    name:"美少女战士",
-                    type:2,
-                    contentTime:"16.21",
-                    content:"你好！",
-
-                },
-                {
-                    name:"多啦爱梦",
-                    type:1,
-                    contentTime:"16.21",
-                    content:"美少女战士，认识你很高兴！",
-
-                },
-                {
-                    name:"美少女战士",
-                    type:2,
-                    contentTime:"16.21",
-                    content:"有多高兴？",
-
-                },
-                {
-                    name:"美少女战士",
-                    type:2,
-                    contentTime:"16.22",
-                    content:"哈哈，我也很高兴认识你",
-
-                },
-                {
-                    name:"美少女战士",
-                    type:2,
-                    contentTime:"16.23",
-                    content:"我想预定4月28号。重庆飞往西双版纳的机票",
-
-                },
-                {
-                    name:"美少女战士",
-                    type:2,
-                    contentTime:"16.23",
-                    content:"有儿童",
-
-                },
-                {
-                    name:"多啦爱梦",
-                    type:1,
-                    contentTime:"16.24",
-                    content:"好的",
-
-                },
-
-            ], 
+            chatList:[], // 聊天记录数据
 
         }
     },
@@ -219,16 +173,10 @@ export default {
 
         // 只查看员工发送
         checkChange(e) {
-           
-            this.recordList.sendType = '员工'
+            console.log(e)
+            this.checkAction = e
             this.getChatList();
             
-        },
-
-        // 进入详情
-        openDetail(val) {
-            this.showDetail = true;
-            this.detailMessage = val
         },
 
         // 获取列表
@@ -236,8 +184,8 @@ export default {
             let data = {
                 pageIndex:this.tablePage.pageCurrent,
                 pageSize:this.tablePage.pageSize,
-                // isStaff:this.checkAction,
-                search:"好的",
+                isStaff:this.checkAction?'员工':'',
+                search:this.inputSearch
             }
             this.$axios.post('/WxChat/GetChatSearchList',data).then((res) => {
                 
@@ -260,6 +208,34 @@ export default {
             this.getChatList()
         },
 
+        // 进入详情
+        openDetail(val) {
+            console.log('详情',val)
+            this.showDetail = true;
+            this.detailMessage = val
+            let data = {
+                sessionid: val.sessionid,
+                pageSize: 50,
+                pageIndex: 1,
+            }
+            this.$axios.post('/WxChat/GetUserChat', data).then((res) => {
+             
+                if (res.data.status === 0 && res.data.body.result.length > 0) {
+                    this.chatList = res.data.body.result
+                    console.log(this.recordList)
+                    // 判断是发送方还是接收方
+                    this.chatList.forEach(item => {
+                        
+                        item['type'] = item.name === this.detailMessage.name && item.userid === this.detailMessage.userid ? 2 : 1
+
+                    })
+                } else {
+                    this.$message.error(res.data.message)
+                }
+            })
+        },
+
+
     },
     created() {
         this.getChatList()
@@ -277,6 +253,17 @@ export default {
             font-size: 10px;
             color: #999;
             margin-left: 35%;
+        }
+        .top_action {
+            /deep/ .el-checkbox__input.is-checked .el-checkbox__inner,
+             .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+                background-color: #0070e2;
+                border-color: #0070e2;
+             }
+            
+             /deep/ .el-checkbox__input.is-checked+.el-checkbox__label {
+                 color: #0070e2;
+             }
         }
     }
     .record_list {
@@ -388,18 +375,18 @@ export default {
             }
             .left_message {
                 .dialog_item {
-                    display: flex;
                     padding: 15px;
                     .item_pic {
+                        vertical-align: top;
+                        display: inline-block;
                         width: 45px;
                         height: 45px;
                         background-color: lightgray;
-                        margin-right: 10px;
-                        margin-top: 20px;
+                        margin: 21px 10px 0px 0px;
                         img {
-                                width: 100%;
-                                height: 100%;
-                                object-fit: contain;
+                            // width: 100%;
+                            height: 100%;
+                            object-fit: contain;
                         }
                         .not_img {
                             width: 100%;
@@ -409,6 +396,8 @@ export default {
                         }
                     }
                     .item_right {
+                        display: inline-block;
+                        width: calc(100% - 55px);
                         p {
                             color: lightgrey;
                             font-size: 10px;
@@ -417,37 +406,47 @@ export default {
                         .right_bubble {
                             border-radius: 0px 20px 20px 20px;
                             background-color: lightgray;
-                            padding: 10px;
+                            padding: 13px 25px;
                             font-size: 14px;
-                            min-width:100px;
+                            min-width: 60px;
                             max-width: 40%;
                             word-wrap: break-word;
                             word-break: break-all;
+                            display: inline-block;
+                            min-height: 39px;
+                            position:relative;
+                            &.not_background {
+                                background-color: transparent;
+                            }
+                            .withdraw {
+                                position: absolute;
+                                color: red;
+                                font-size: 12px;
+                                background-color: rgba(red, 0.1);
+                                padding: 5px;
+                                width: 85px;
+                                text-align: center;
+                                left: calc(100% + 20px);
+                                top: 50%;
+                                margin-top: -13px;
+                            }
                         }
-                    }
-                    .withdraw {
-                        color:red;
-                        font-size:12px;
-                        background-color: papayawhip;
-                        padding: 5px;
-                        margin: 6px 15px;
-                    }
+                    } 
                 }
             }
             .right_message {
                 text-align: right;
                 .sender_dialog_item {
-                    display: flex;
-                    align-items: flex-end;
-                    justify-content: flex-end;
                     padding: 15px;
                     .sender_item_pic {
+                        vertical-align: top;
+                        display: inline-block;
                         width: 45px;
                         height: 45px;
                         background-color: lightgray;
-                        margin-left: 10px;
+                        margin: 21px 0px 0px 10px;
                         img {
-                            width: 100%;
+                            // width: 100%;
                             height: 100%;
                             object-fit: contain;
                         }
@@ -459,23 +458,48 @@ export default {
                         }
                     }
                     .sender_item_right {
+                        display: inline-block;
+                        width: calc(100% - 55px);
+
                         p {
                             color: lightgrey;
                             font-size: 10px;
-                            // margin-bottom: 5px;
+                            margin-bottom: 5px;
                         }
                         .sender_right_bubble {
+                            display: inline-block;
                             border-radius: 20px 0px 20px 20px;
-                            background-color: #409eff;
-                            color:#fff;
+                            background-color: #0070e2;
+                            color: #fff;
                             font-size: 14px;
-                            padding: 10px;
-                            // min-width:100px;
-                            // max-width: 40%;
-                            // word-wrap: break-word;
-                            // word-break: break-all;
+                            padding: 13px 25px;
+                            min-width: 60px;
+                            max-width: 40%;
+                            min-height: 39px;
+                            word-wrap: break-word;
+                            word-break: break-all;
+                            margin-left: auto;
+                            text-align: left;
+                            position: relative;
+                            
+                            &.not_background {
+                                background-color: transparent;
+                            }
+                            .withdraw {
+                                position: absolute;
+                                color: red;
+                                font-size: 12px;
+                                background-color: rgba(red, 0.1);
+                                padding: 5px;
+                                width: 85px;
+                                text-align: center;
+                                right: calc(100% + 20px);
+                                top: 50%;
+                                margin-top: -13px;
+                            }
                         }
                     }
+                
                 }
             }
         }

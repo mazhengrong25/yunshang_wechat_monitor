@@ -2,8 +2,8 @@
  * @Description: 
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:33:05
- * @LastEditTime: 2021-04-15 14:41:14
- * @LastEditors: wish.WuJunLong
+ * @LastEditTime: 2021-05-24 13:40:49
+ * @LastEditors: mzr
  */
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -12,7 +12,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/',
+    path: '/index',
     name: 'Index',
     component: () => import('../views/Index.vue')
   },

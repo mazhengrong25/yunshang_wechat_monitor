@@ -2,13 +2,12 @@
  * @Description: 导航栏
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 15:12:11
- * @LastEditTime: 2021-05-18 14:39:24
+ * @LastEditTime: 2021-05-25 11:09:59
  * @LastEditors: mzr
 -->
 <template>
   <div class="global_header">
     <div class="header_title">云上企微监控</div>
-
     <div class="account_option">
       <el-dropdown trigger="click" placement="bottom-end">
         <div class="account_message">

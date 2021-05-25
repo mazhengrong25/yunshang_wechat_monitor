@@ -46,3 +46,15 @@ img {
 .el-table thead {
   color: #333;
 }
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+  background-color: #0070e2;
+}
+.el-tabs__nav {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+.el-button--primary {
+  background-color: #0070e2;
+  border-color: #0070e2;
+}

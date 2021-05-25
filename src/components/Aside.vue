@@ -2,32 +2,22 @@
  * @Description: 侧边栏
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 16:44:46
- * @LastEditTime: 2021-05-19 16:02:55
+ * @LastEditTime: 2021-05-24 14:01:24
  * @LastEditors: mzr
 -->
 <template>
   <div class="global_aside">
-    <!-- <div class="aside_list">
-      <div class="list_title">企业风控</div>
-      <div class="list_item">
-         <div class="item_name" style="color:#fff">聊天存档</div>
-         <div class="item_name" @click="open">违规操作</div>
-         <div class="item_name" @click="open">流失提醒</div>
-      </div>
-
-    </div> -->
-
      <el-menu 
-        default-active="1"
+        default-active="/index"
         background-color="#545c64"
         text-color="#999"
         active-text-color="#fff"
         router
       >
-        <el-menu-item index="/">
+        <el-menu-item index="/index">
           <template slot="title">
             <div class="title_item">
-              <div class="archive_img"></div>
+              <div class="archive_img" />
               <span>聊天存档</span>
             </div>
           </template>
@@ -77,43 +67,12 @@ export default {
 
 <style lang="less" scoped>
 .global_aside {
-  // background: #393c3e;
   width: 100%;
   height: 100%;
-  // .aside_list{
-  //   &:not(:last-child){
-  //     margin-bottom: 20px;
-  //   }
-  //   .list_title{
-  //     color: #fff;
-  //     font-size: 16px;
-  //     margin-bottom: 20px;
-  //   }
-  //   .list_item{
-  //     .item_name{
-  //       color: #999;
-  //       display: inline-block;
-  //       margin-bottom: 20px;
-  //       cursor: pointer;
-  //       &:not(&:nth-child(even)){
-  //         margin-right: 20px;
-  //       }
-  //       &:hover{
-  //         color: #fff;
-  //       }
-  //     }
-  //   }
-  // }
   /deep/ .el-menu {
     width: 100% !important;
     height: 100% !important; 
-    .el-menu-item is-active {
-      .archive_img {
-        background: url("../static/archive.png")
-        no-repeat center center !important;
-        background-size: contain !important;
-      }
-    }
+  
     .el-menu-item {
       display: flex;
       justify-content: center;
@@ -123,26 +82,50 @@ export default {
       }
       .title_item {
         display: flex;
+        align-items: center;
         .archive_img {
           width: 16px;
-          background: url("../static/archive.png")
-          no-repeat center center !important;
-          background-size: contain !important;
+          height: 16px;
+          background: url("../static/archive.png") no-repeat center center;
+          background-size: contain;
         }
         .violation_img {
           width: 16px;
-          background: url("../static/violation.png")
-          no-repeat center center !important;
-          background-size: contain !important;
+          height: 16px;
+          background: url("../static/violation.png") no-repeat center center;
+          background-size: contain;
         }
         .remind_img {
           width: 16px;
-          background: url("../static/remind.png")
-          no-repeat center center !important;
-          background-size: contain !important;
+          height: 16px;
+          background: url("../static/remind.png") no-repeat center center;
+          background-size: contain;
         }
         span {
           padding-left: 10px;
+        }
+      }
+    }
+    .is-active {
+      .title_item {
+
+        .archive_img {
+          width: 16px;
+          height: 16px;
+          background: url("../static/archive_active.png") no-repeat center center;
+          background-size: contain;
+        }
+        .violation_img {
+          width: 16px;
+          height: 16px;
+          background: url("../static/violation_active.png") no-repeat center center;
+          background-size: contain;
+        }
+        .remind_img {
+          width: 16px;
+          height: 16px;
+          background: url("../static/remind_active.png") no-repeat center center;
+          background-size: contain;
         }
       }
     }

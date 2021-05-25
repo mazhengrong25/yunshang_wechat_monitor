@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: mzr
  * @Date: 2021-04-16 10:22:50
- * @LastEditTime: 2021-05-07 11:52:54
+ * @LastEditTime: 2021-05-24 14:45:27
  * @LastEditors: mzr
 -->
 <template>
@@ -12,7 +12,7 @@
         <HeaderTemplate></HeaderTemplate>
       </el-header>
       <el-container>
-        <el-aside width="250px">
+        <el-aside width="200px">
           <AsideTemplate></AsideTemplate>
         </el-aside>
         <el-main>
