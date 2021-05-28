@@ -2,7 +2,7 @@
  * @Description: 搜索聊天记录 --- 搜索内容
  * @Author: mzr
  * @Date: 2021-05-20 15:59:08
- * @LastEditTime: 2021-05-21 17:32:18
+ * @LastEditTime: 2021-05-26 15:51:32
  * @LastEditors: mzr
 -->
 <template>
@@ -31,7 +31,7 @@
 export default {
     props: {
 
-        // 列表数据(只包含内容)
+        // 列表数据
         recordList: {
             type: Array,
             default: () => []

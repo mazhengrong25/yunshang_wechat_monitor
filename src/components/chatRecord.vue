@@ -2,7 +2,7 @@
  * @Description: 聊天存档列表 ---- 聊天记录
  * @Author: mzr
  * @Date: 2021-04-28 14:27:48
- * @LastEditTime: 2021-05-25 16:26:46
+ * @LastEditTime: 2021-05-27 18:05:12
  * @LastEditors: mzr
 -->
 <template>
@@ -93,43 +93,7 @@
             </div>
             <!-- 内容 -->
             <div class="dialog_content">
-                <!-- <div class="content_date">
-                    <div class="date_item">2021-3-29 16:20</div>
-                </div> -->
-                <div v-for="(item, index) in chatList" :key="index" :class="item.type === 1?'left_message':'right_message'">
-                    <!-- 发送方 -->
-                    <div v-if="item.type === 2" class="sender_dialog_item">
-                        <div class="sender_item_right">
-                            <p>{{item.name}} {{item.contentTime}}</p>
-                            <div :class="item.contentType === 'emotion' || item.contentType === 'image' ?'sender_right_bubble not_background':'sender_right_bubble'">
-                                <div class="withdraw" v-if="item.contentType === 'revoke'">此消息已撤回</div>
-                                <DialogForward v-if="item.contentType === 'mixed'" :dialogList="item"></DialogForward>
-                                <el-image :z-index="2500" v-else-if="item.contentType === 'image' || item.contentType === 'emotion'" fit="contain" :src="$imgUrl + JSON.parse(item.content).resourcePath" :style="item.contentType === 'emotion' ? `max-width:${JSON.parse(item.content).width}px;max-height:${JSON.parse(item.content).height}px`:''" :preview-src-list="[$imgUrl + JSON.parse(item.content).resourcePath]"></el-image>
-                                <div v-else>{{item.content}}</div>
-                            </div>
-                        </div>
-                        <div class="sender_item_pic">
-                            <img v-if="item.photoUrl" :src="item.photoUrl" />
-                            <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
-                        </div>
-                    </div>
-                    <!-- 接收方 -->
-                    <div v-else class="dialog_item">
-                        <div class="item_pic">
-                            <img v-if="item.photoUrl" :src="item.photoUrl" />
-                            <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
-                        </div>
-                        <div class="item_right">
-                            <p>{{item.contentTime}} {{item.name}}</p>
-                            <div :class="item.contentType === 'emotion' || item.contentType === 'image' ?'right_bubble not_background':'right_bubble'">
-                                <DialogForward v-if="item.contentType === 'mixed'" :dialogList="item"></DialogForward>
-                                <el-image :z-index="2500" v-else-if="item.contentType === 'image' || item.contentType === 'emotion'" fit="contain" :src="$imgUrl + JSON.parse(item.content).resourcePath" :style="item.contentType === 'emotion' ? `max-width:${JSON.parse(item.content).width}px;max-height:${JSON.parse(item.content).height}px`:''" :preview-src-list="[$imgUrl + JSON.parse(item.content).resourcePath]"></el-image>
-                                <div v-else>{{item.content}}</div>
-                                <div class="withdraw" v-if="item.contentType === 'revoke'">此消息已撤回</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <SituationDialogue :recordList="chatList"></SituationDialogue>
             </div>
       </el-dialog>
   </div>
@@ -146,7 +110,8 @@ export default {
 
     },
     components: {
-        DialogForward: () => import("../components/dialogForward"),  // 转发对话框
+        
+        SituationDialogue: () => import("./situationDialogue"), // 聊天对话
     },
     data() {
         return {
@@ -222,13 +187,13 @@ export default {
              
                 if (res.data.status === 0 && res.data.body.result.length > 0) {
                     this.chatList = res.data.body.result
-                    console.log(this.recordList)
                     // 判断是发送方还是接收方
                     this.chatList.forEach(item => {
                         
                         item['type'] = item.name === this.detailMessage.name && item.userid === this.detailMessage.userid ? 2 : 1
 
                     })
+                    console.log(this.chatList)
                 } else {
                     this.$message.error(res.data.message)
                 }
@@ -361,147 +326,7 @@ export default {
         .dialog_content {
             width:auto;
             overflow-y: auto;
-            height: 60vh;
-            .content_date {
-                display: flex;
-                justify-content: center;
-                margin-top:15px;
-                .date_item {
-                    
-                    font-size: 10px;
-                    background-color: lightgray;
-                    padding: 2px 5px;
-                }
-            }
-            .left_message {
-                .dialog_item {
-                    padding: 15px;
-                    .item_pic {
-                        vertical-align: top;
-                        display: inline-block;
-                        width: 45px;
-                        height: 45px;
-                        background-color: lightgray;
-                        margin: 21px 10px 0px 0px;
-                        img {
-                            // width: 100%;
-                            height: 100%;
-                            object-fit: contain;
-                        }
-                        .not_img {
-                            width: 100%;
-                            height: 100%;
-                            line-height: 45px;
-                            text-align: center;
-                        }
-                    }
-                    .item_right {
-                        display: inline-block;
-                        width: calc(100% - 55px);
-                        p {
-                            color: lightgrey;
-                            font-size: 10px;
-                            margin-bottom: 5px;
-                        }
-                        .right_bubble {
-                            border-radius: 0px 20px 20px 20px;
-                            background-color: lightgray;
-                            padding: 13px 25px;
-                            font-size: 14px;
-                            min-width: 60px;
-                            max-width: 40%;
-                            word-wrap: break-word;
-                            word-break: break-all;
-                            display: inline-block;
-                            min-height: 39px;
-                            position:relative;
-                            &.not_background {
-                                background-color: transparent;
-                            }
-                            .withdraw {
-                                position: absolute;
-                                color: red;
-                                font-size: 12px;
-                                background-color: rgba(red, 0.1);
-                                padding: 5px;
-                                width: 85px;
-                                text-align: center;
-                                left: calc(100% + 20px);
-                                top: 50%;
-                                margin-top: -13px;
-                            }
-                        }
-                    } 
-                }
-            }
-            .right_message {
-                text-align: right;
-                .sender_dialog_item {
-                    padding: 15px;
-                    .sender_item_pic {
-                        vertical-align: top;
-                        display: inline-block;
-                        width: 45px;
-                        height: 45px;
-                        background-color: lightgray;
-                        margin: 21px 0px 0px 10px;
-                        img {
-                            // width: 100%;
-                            height: 100%;
-                            object-fit: contain;
-                        }
-                        .not_img {
-                            width: 100%;
-                            height: 100%;
-                            text-align: center;
-                            line-height: 45px;
-                        }
-                    }
-                    .sender_item_right {
-                        display: inline-block;
-                        width: calc(100% - 55px);
-
-                        p {
-                            color: lightgrey;
-                            font-size: 10px;
-                            margin-bottom: 5px;
-                        }
-                        .sender_right_bubble {
-                            display: inline-block;
-                            border-radius: 20px 0px 20px 20px;
-                            background-color: #0070e2;
-                            color: #fff;
-                            font-size: 14px;
-                            padding: 13px 25px;
-                            min-width: 60px;
-                            max-width: 40%;
-                            min-height: 39px;
-                            word-wrap: break-word;
-                            word-break: break-all;
-                            margin-left: auto;
-                            text-align: left;
-                            position: relative;
-                            
-                            &.not_background {
-                                background-color: transparent;
-                            }
-                            .withdraw {
-                                position: absolute;
-                                color: red;
-                                font-size: 12px;
-                                background-color: rgba(red, 0.1);
-                                padding: 5px;
-                                width: 85px;
-                                text-align: center;
-                                right: calc(100% + 20px);
-                                top: 50%;
-                                margin-top: -13px;
-                            }
-                        }
-                    }
-                
-                }
-            }
+            height: 60vh;  
         }
     }
 }

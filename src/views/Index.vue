@@ -2,7 +2,7 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-05-25 17:10:22
+ * @LastEditTime: 2021-05-27 17:29:18
  * @LastEditors: mzr
 -->
 
@@ -79,7 +79,11 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="departmentName" label="部门"></el-table-column>
+                    <el-table-column prop="departmentName" label="部门">
+                        <template slot-scope="scope">
+                            {{scope.row.departmentName}}
+                        </template>
+                    </el-table-column>
                     <el-table-column prop="numberclient" label="客户数">
                         <template slot-scope="scope">
                             {{scope.row.numberclient}}
@@ -129,7 +133,11 @@
                     </el-table-column>
                     <!-- <el-table-column  label="分组"></el-table-column> -->
                     <!-- <el-table-column  label="聊天数"></el-table-column> -->
-                    <el-table-column prop="groupchat" label="群聊数"></el-table-column>
+                    <el-table-column prop="groupchat" label="群聊数">
+                        <template slot-scope="scope">
+                            {{scope.row.groupchat}}
+                        </template>
+                    </el-table-column>
                     <el-table-column prop="gender" label="性别">
                         <template slot-scope="scope">
                             {{scope.row.gender === '1' ?'男':
@@ -153,9 +161,9 @@
                     <el-table-column show-overflow-tooltip label="群名称">
                         <template slot-scope="scope">
                             <div class="table_wechat">
-                                <div class="table_img">
+                                <div class="table_img not_background">
                                     <img v-if="scope.row.avatar" :src="scope.row.avatar" />
-                                    <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                    <img v-else src="../static/group_avatar.png" /> 
                                 </div>
                                 <div class="table_item">
                                     <div class="person_name">{{scope.row.name}}</div>
@@ -284,14 +292,10 @@ export default {
         }
     },
     methods: {
-        // 返回列表页
+
+        // 相关列表返回列表页
         closeSearch(){
             this.inputSearch = ""
-        },
-        changeCheck(e) {
-            this.checkList = e
-            this.$forceUpdate()
-            this.getDataList()
         },
 
         // 跳转到对应详情
@@ -313,6 +317,13 @@ export default {
         // 输入框搜索
         handleInputSearch(e) {
             this.inputSearch = e.target.value
+        },
+
+        // 单选框绑定值变化
+        changeCheck(e) {
+            this.checkList = e
+            this.$forceUpdate()
+            this.getDataList()
         },
 
         // 搜索筛选
@@ -374,8 +385,8 @@ export default {
     },
 
     created() {
-        this.getDepartList()
-        this.getDataList()
+        this.getDepartList() // 获取部门列表
+        this.getDataList() // 获取表格列表
     }
 }
 </script>
@@ -466,6 +477,9 @@ export default {
                         height: 100%;
                         line-height: 45px;
                         text-align: center;
+                    }
+                    &.not_background {
+                        background-color: transparent;
                     }
                 }
             }

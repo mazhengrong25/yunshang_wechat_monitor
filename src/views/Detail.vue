@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-05-25 17:49:01
+ * @LastEditTime: 2021-05-27 17:25:23
  * @LastEditors: mzr
 -->
 <template>
@@ -12,11 +12,12 @@
         </div>
         <div class="detail_content">
             <div class="content_left">
+                <!-- 列表表头 -->
                 <div class="left_back" @click="goList">
                     <div class="left_back_item">
-                        <div class="back_image">
+                        <div class="back_image not_background">
                             <img v-if="userMessage.avatar" :src="userMessage.avatar" />
-                            <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                            <img v-else src="../static/group_avatar.png" />
                         </div>
                         <div class="back_explain">
                             <div class="explain_name">{{userMessage.name}}</div>
@@ -27,7 +28,7 @@
                         <i class="element-icons el-icondayuhao"></i>
                     </div>
                 </div>
-                <!-- 群列表 -->
+                <!-- 群聊列表 -->
                 <div v-if="listType === '群聊'">
                     <div class="group_pane">
                         <el-tabs v-model="activeGroupName" @tab-click="changeGroupTabs">
@@ -45,6 +46,7 @@
                                     <div class="staff_list_item_total">
                                         <div class="staff_list_item" 
                                             v-for="(item,index) in getGroupData(true)" :key="index" 
+                                            @click="groupDetail(item)"
                                         >
                                             <div class="item_top">
                                                 <div class="top_div">
@@ -70,7 +72,7 @@
                         </el-tabs>
                     </div>
                 </div>
-                <!-- 员工 客户列表 -->
+                <!-- 私聊 群聊列表 -->
                 <div v-else>
                     <div class="left_query">
                         <el-input style="width:200px" placeholder="搜索" clearable @keyup.enter.native="listSearch" v-model="inputSearch">
@@ -85,9 +87,9 @@
                                     <div class="pane_title">共有{{chatList.length}}条会议</div>
                                     <div class="left_conver_list">
                                         <div class="list_item" v-for="(item,index) in chatList" :key="index" @click="chatDetail(item)">
-                                            <div class="item_img">
+                                            <div class="item_img not_background">
                                                 <img v-if="item.photoUrl" :src="item.photoUrl" />
-                                                <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                                <img  v-if="item.cahtType === 'GROUP'" src="../static/group_avatar.png" /> 
                                             </div>
 
                                             <div class="item_right">
@@ -121,7 +123,7 @@
                         </div>
                         <!-- 搜索记录按钮 -->
                         <div class="action_search">
-                            <el-popover title="搜索聊天记录" popper-class="record_dialog_popper" placement="bottom-end" trigger="click" transition="fade-in-linear">
+                            <el-popover title="搜索聊天记录" popper-class="record_dialog_popper" placement="bottom" trigger="click" transition="fade-in-linear">
 
                                 <div class="record_dialog">
                                     <div class="record_search">
@@ -157,7 +159,15 @@
                                                         <div class="image_item">
                                                             <!-- :style="item.msgtype === 'emotion' ?`width:${item.width}px;height: ${item.height}px`:''" -->
                                                             <div class="image_self">
-                                                                <el-image :z-index="2500" fit="contain" style="width: 100%; height: 100%" :preview-src-list="[$imgUrl + item.resourcePath]" :src="$imgUrl + item.resourcePath">
+                                                                <el-image 
+                                                                    :z-index="2500"
+                                                                    lazy
+                                                                    fit="contain" 
+                                                                    style="width: 100%; height: 100%" 
+                                                                    :preview-src-list="[$imgUrl + item.resourcePath]" 
+                                                                    :src="$imgUrl + item.resourcePath"
+                                                                    @click.stop="closeImage"
+                                                                >
                                                                 </el-image>
                                                             </div>
                                                             <div class="image_source">{{item.sendChatName}}</div>
@@ -202,11 +212,9 @@
                         
                         <!-- 查看群成员弹窗 -->
                         <div class="action_client">
-                            <div class="client_icon" @click="openGroupDialog" v-if="isGroup === 'GROUP'">
-                                <i class="element-icons el-iconqiweiqunchengyuan"></i>
-                            </div>
 
-                            <el-dialog custom-class="groupDialog" title="查看群成员" :visible.sync="showGroup" width="100%" top="0" :modal='false'>
+                            <el-popover title="查看群成员" width="400" popper-class="group_dialog_popper" placement="bottom-end"  trigger="click">
+                                
                                 <div class="group_dialog">
                                     <div class="group_radio">
                                         <div class="group_btn">
@@ -236,59 +244,20 @@
                                         </div>
                                     </div>
                                 </div>
-                            </el-dialog>
 
+                                <!-- v-if惰性加载 换为v-show -->
+                                <div class="client_icon" slot="reference"  @click="openGroupDialog" v-show="isGroup === 'GROUP'">
+                                    <i class="element-icons el-iconqiweiqunchengyuan"></i>
+                                </div>
+                                
+                            </el-popover>
+  
                         </div>
                     </div>
                 </div>
+                <!-- 聊天对话 -->
                 <div class="right_content">
-                    <!-- <div class="content_date">
-                        <div class="date_item">2021-3-29 16:20</div>
-                    </div> -->
-                    <div v-for="(item, index) in recordList" :key="index" :class="item.type === 1?'left_message':'right_message'">
-                        <!-- 发送方 蓝色-->
-                        <div v-if="item.type === 2" class="sender_dialog_item">
-                            <div class="sender_item_right">
-
-                                <p>{{item.name}} {{item.contentTime}}</p>
-                                <div :class="item.contentType === 'emotion' || item.contentType === 'image' ?'sender_right_bubble not_background':'sender_right_bubble'">
-                                    <div class="withdraw" v-if="item.contentType === 'revoke'">此消息已撤回</div>
-                                    <DialogForward v-if="item.contentType === 'mixed'" :dialogList="item"></DialogForward>
-
-                                    <el-image v-else-if="item.contentType === 'image' || item.contentType === 'emotion'" fit="contain" :src="$imgUrl + JSON.parse(item.content).resourcePath" :style="item.contentType === 'emotion' ? `max-width:${JSON.parse(item.content).width}px;max-height:${JSON.parse(item.content).height}px`:''" :preview-src-list="[$imgUrl + JSON.parse(item.content).resourcePath]"></el-image>
-
-                                    <div v-else>{{item.content}}</div>
-
-                                </div>
-
-                            </div>
-                            <div class="sender_item_pic">
-                                <img v-if="item.photoUrl" :src="item.photoUrl" />
-                                <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
-                            </div>
-                        </div>
-                        <!-- 接收方 -->
-                        <div v-else class="dialog_item">
-                            <div class="item_pic">
-                                <img v-if="item.photoUrl" :src="item.photoUrl" />
-                                <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
-                            </div>
-                            <div class="item_right">
-                                <p>{{item.contentTime}} {{item.name}}</p>
-
-                                <div :class="item.contentType === 'emotion' || item.contentType === 'image' ?'right_bubble not_background':'right_bubble'">
-
-                                    <DialogForward v-if="item.contentType === 'mixed'" :dialogList="item"></DialogForward>
-
-                                    <el-image v-else-if="item.contentType === 'image' || item.contentType === 'emotion'" fit="contain" :src="$imgUrl + JSON.parse(item.content).resourcePath" :style="item.contentType === 'emotion' ? `max-width:${JSON.parse(item.content).width}px;max-height:${JSON.parse(item.content).height}px`:''" :preview-src-list="[$imgUrl + JSON.parse(item.content).resourcePath]"></el-image>
-
-                                    <div v-else>{{item.content}}</div>
-                                    <div class="withdraw" v-if="item.contentType === 'revoke'">此消息已撤回</div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+                    <SituationDialogue :recordList="recordList"></SituationDialogue>
                 </div>
 
             </div>
@@ -322,19 +291,23 @@
             </span>
         </el-dialog>
 
+        <!-- 群聊弹窗 -->
+        <GroupDialog :showDialog="showGroup" :titleMessage="showGroupData" @closeModal="closeGroupDialog"></GroupDialog>
     </div>
 </template>
 
 <script>
 export default {
     components: {
-        DialogForward: () => import("../components/dialogForward"),  // 转发对话框
-        SearchContent: () => import("../components/searchContent"),  // 搜索聊天内容
+        SearchContent: () => import("../components/searchContent"),   // 搜索聊天内容
+        GroupDialog: () => import("../components/groupDialog"),       // 群聊列表  个人信息展示
+        SituationDialogue: () => import("../components/situationDialogue"), // 聊天对话
     },
     data() {
         return {
  
             isGroup: '', // 判断当前窗口类型    ONEBYONE私聊  GROUP群聊
+            thatSessionid: '', // 当前打开搜索记录的聊天人ID
 
             listType: "", // 列表类型  员工 客户 群聊
             userMessage: {}, // 用户信息 
@@ -349,15 +322,14 @@ export default {
             activeName: "ALL", // 员工客户 标签页  默认值是全部
             activeGroupName: "员工", // 群成员  标签页   默认值是员工
             activeRecordName: "calendar", // 搜索记录 标签页 默认值是日历
-            textSumList: [], // 搜索记录 搜索内容列表
 
             // 对话框
             showTag: false, // 标记内容
             showLoad: false, // 下载
-            showGroup: false, // 群成员
+            showGroup: false, // 群聊列表 弹窗
 
 
-            // 员工客户列表标签
+            // 私聊群聊列表标签
             chatTypeArr: [{
                 name: '全部',
                 value: 'ALL'
@@ -369,8 +341,6 @@ export default {
                 value: 'GROUP'
             }],
 
-            chatList: [], // 存放员工客户
-
             // 群聊标签
             groupTypeArr: [{
                 name: "员工",
@@ -380,17 +350,18 @@ export default {
                 value: "客户"
             }],
 
-            groupList: [], // 存放群聊
 
+            textSumList: [],    // 搜索记录 搜索内容列表
+            chatList: [],       // 存放私聊群聊
+            recordList: [],     // 聊天记录对话
+            groupList: [],      // 存放群聊
+            showGroupData:{},   // 群聊组件信息
 
-            // 聊天记录对话
-            recordList: [],
 
             // 搜索记录 弹窗
-            sumList: [], // 图片视频链接
-            dayTime: [], // 日期列表
-            calendarValue: new Date(), // 日历
-            thatSessionid: '', // 当前打开搜索记录的聊天人ID
+            sumList: [],                // 图片视频链接
+            dayTime: [],                // 日期列表
+            calendarValue: new Date(),  // 日历
             fileList: [
                 {
                     name: "秘密花园",
@@ -406,6 +377,7 @@ export default {
 
             // 群成员 弹窗
             groupTypeBtn: "员工", // 默认值 员工
+
 
         }
     },
@@ -450,7 +422,8 @@ export default {
         // 列表筛选
         async listFilter() {
             if (this.inputSearch) {
-                let data = []
+                console.log('输入',this.inputSearch)
+                let data = [];
                 await this.chatList.forEach(item => {
                     if (item.name.indexOf(this.inputSearch) !== -1 ||
                         item.userid.indexOf(this.inputSearch) !== -1) {
@@ -475,7 +448,7 @@ export default {
             }
 
             console.log('dialogItem', val)
-            // 聊天记录弹窗  聊天人id
+            // 聊天记录弹窗  聊天人id 
             this.thatSessionid = val ? val.group : this.chatList[0].group
             // 查看群成员弹窗
             this.isGroup = val ? val.cahtType : this.chatList[0].cahtType
@@ -540,7 +513,6 @@ export default {
             }
             let data = JSON.parse(JSON.stringify(this.dialogItem))
             data.endTime = e.day + ' 00:00:00'
-            console.log(this.dialogItem)
             await this.chatDetail(data, true)
         },
 
@@ -566,8 +538,9 @@ export default {
             }
             this.$axios.post('/WxChat/GetUserSearchChatList', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.result.length > 0) {
-
+                    // 图片/链接
                     this.sumList = res.data.body.result
+                    // 内容
                     if (type) {
                         this.textSumList = res.data.body.result
                     }
@@ -575,6 +548,23 @@ export default {
                     this.$message.error(res.data.message)
                 }
             })
+        },
+
+        // 搜索聊天记录  关闭图片
+        closeImage() {
+            console.log('关闭图片')
+            this.$nextTick(()=>{
+                // 获取遮罩层dom
+                let domImageMask = document.querySelector(".el-image-viewer__mask");
+                if (!domImageMask) {
+                    return;
+                }
+                domImageMask.addEventListener("click", () => {
+                    // 点击遮罩层时调用关闭按钮的 click 事件
+                    document.querySelector(".el-image-viewer__close").click();
+                });
+            })
+
         },
 
         // 搜索内容  输入值取值
@@ -604,7 +594,6 @@ export default {
 
         // 打开群成员内容
         openGroupDialog() {
-            this.showGroup = true
             this.getGroupList();
         },
 
@@ -619,7 +608,7 @@ export default {
                 }
             })
             }else {
-                // groupTypeBtn 群成员弹窗 筛选出员工列表
+                // groupTypeBtn 群成员弹窗 筛选出员工 客户
                 this.groupList.forEach(item => {
                 if (item.personnelType.indexOf(this.groupTypeBtn) !== -1) {
                     data.push(item)
@@ -631,7 +620,7 @@ export default {
 
         },
 
-        // 切换群成员按钮
+        // 切换群成员按钮 对话框
         changeGroupType(val) {
             this.groupTypeBtn = val
         },
@@ -647,10 +636,12 @@ export default {
             }
             this.$axios.post('/WxChat/GetGroupChatUser', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.length > 0) {
-                    let groupMaster = {}
+                    
+                    // 群成员列表
                     this.groupList = res.data.body
 
                     // 判断群主
+                    let groupMaster = {}
                     for (let i = 0; i < this.groupList.length; i++) {
                         if (this.groupList[i].memberType === '群主') {
                             groupMaster = this.groupList[i];
@@ -666,7 +657,20 @@ export default {
                 }
 
             })
-        }
+        },
+
+        // 打开群聊列表对应弹窗
+        groupDetail(e) {
+            console.log('群聊',e)
+            this.showGroup = true
+            this.showGroupData = e
+        },  
+        
+        // 关闭群聊弹窗
+        closeGroupDialog(){
+            this.showGroup = false
+        }                     
+
     },
     async created() {
         this.listType = this.$route.query.type // 列表类型
@@ -674,10 +678,26 @@ export default {
         if(this.listType === '群聊'){
             await this.getGroupList() // 群聊列表
         }else {
-            await this.getChatList() // 员工 客户列表
+            await this.getChatList() // 私聊 群聊列表
 
         }
-    }
+    },
+    // mounted() {
+        
+    //         this.$nextTick(()=>{
+    //             // 获取遮罩层dom
+    //             let domImageMask = document.querySelector(".el-image-viewer__mask");
+    //             if (!domImageMask) {
+    //                 return;
+    //             }
+    //             domImageMask.addEventListener("click", () => {
+    //                 // 点击遮罩层时调用关闭按钮的 click 事件
+    //                 document.querySelector(".el-image-viewer__close").click();
+    //             });
+    //         })
+
+        
+    // }
 }
 </script>
 
@@ -709,9 +729,6 @@ export default {
                 .left_back_item {
                     display: inline-flex;
                     .back_image {
-                        // display: flex;
-                        // align-items: center;
-                        // justify-content: center;
                         width: 45px;
                         height: 45px;
                         background-color: lightgray;
@@ -726,6 +743,9 @@ export default {
                             height: 100%;
                             line-height: 45px;
                             text-align: center;
+                        }
+                        &.not_background {
+                            background-color: transparent;
                         }
                     }
                     .back_explain {
@@ -795,6 +815,9 @@ export default {
                                     height: 100%;
                                     text-align: center;
                                     line-height: 60px;
+                                }
+                                &.not_background {
+                                    background-color: transparent;
                                 }
                             }
                             .item_right {
@@ -912,7 +935,7 @@ export default {
                                         img {
                                             width: 100%;
                                             height: 100%;
-                                            object-fit: contain;
+                                            object-fit: cover;
                                         }
                                         .not_img {
                                             width: 100%;
@@ -955,6 +978,10 @@ export default {
                                     line-height: 12px;
                                     padding: 5px;
                                 }
+                            }
+                            &:hover {
+                                cursor: pointer;
+                                background-color: #ebeef5;
                             }
                         }
                     }
@@ -1030,150 +1057,12 @@ export default {
                 width: auto;
                 overflow-y: auto;
                 height: calc(100vh - 167px);
-                .content_date {
-                    display: flex;
-                    justify-content: center;
-                    margin-top: 15px;
-                    .date_item {
-                        color: darkgray;
-                        font-size: 10px;
-                        background-color: lightgray;
-                        padding: 2px 5px;
-                    }
-                }
-                .left_message {
-                    .dialog_item {
-                        padding: 15px;
-                        .item_pic {
-                            vertical-align: top;
-                            display: inline-block;
-                            width: 45px;
-                            height: 45px;
-                            background-color: lightgray;
-                            margin: 21px 10px 0px 0px;
-                            img {
-                                // width: 100%;
-                                height: 100%;
-                                object-fit: contain;
-                            }
-                            .not_img {
-                                width: 100%;
-                                height: 100%;
-                                line-height: 45px;
-                                text-align: center;
-                            }
-                        }
-                        .item_right {
-                            display: inline-block;
-                            width: calc(100% - 55px);
-                            p {
-                                color: lightgrey;
-                                font-size: 10px;
-                                margin-bottom: 5px;
-                            }
-                            .right_bubble {
-                                border-radius: 0px 20px 20px 20px;
-                                background-color: lightgray;
-                                padding: 13px 25px;
-                                font-size: 14px;
-                                min-width: 60px;
-                                max-width: 40%;
-                                word-wrap: break-word;
-                                word-break: break-all;
-                                display: inline-block;
-                                min-height: 39px;
-                                position: relative;
-                                &.not_background {
-                                    background-color: transparent;
-                                }
-                                .withdraw {
-                                    position: absolute;
-                                    color: red;
-                                    font-size: 12px;
-                                    background-color: rgba(red, 0.1);
-                                    padding: 5px;
-                                    width: 85px;
-                                    text-align: center;
-                                    left: calc(100% + 20px);
-                                    top: 50%;
-                                    margin-top:-13px;
-                                }
-                            }
-                        }
-                    }
-                }
-                .right_message {
-                    text-align: right;
-                    .sender_dialog_item {
-                        padding: 15px;
-                        .sender_item_pic {
-                            vertical-align: top;
-                            display: inline-block;
-                            width: 45px;
-                            height: 45px;
-                            background-color: lightgray;
-                            margin: 21px 0px 0px 10px;
-                            img {
-                                // width: 100%;
-                                height: 100%;
-                                object-fit: contain;
-                            }
-                            .not_img {
-                                width: 100%;
-                                height: 100%;
-                                text-align: center;
-                                line-height: 45px;
-                            }
-                        }
-                        .sender_item_right {
-                            display: inline-block;
-                            width: calc(100% - 55px);
-
-                            p {
-                                color: lightgrey;
-                                font-size: 10px;
-                                margin-bottom: 5px;
-                            }
-                            .sender_right_bubble {
-                                display: inline-block;
-                                border-radius: 20px 0px 20px 20px;
-                                background-color: #0070e2;
-                                color: #fff;
-                                font-size: 14px;
-                                padding: 13px 25px;
-                                min-width: 60px;
-                                max-width: 40%;
-                                min-height: 39px;
-                                word-wrap: break-word;
-                                word-break: break-all;
-                                margin-left: auto;
-                                text-align: left;
-                                position: relative;
-
-                                &.not_background {
-                                    background-color: transparent;
-                                }
-                                .withdraw {
-                                    position: absolute;
-                                    color: red;
-                                    font-size: 12px;
-                                    background-color: rgba(red, 0.1);
-                                    padding: 5px;
-                                    width: 85px;
-                                    text-align: center;
-                                    right: calc(100% + 20px);
-                                    top:50%;
-                                    margin-top: -13px;
-                                }
-                            }
-                        }
-                    }
-                }
+               
             }
         }
     }
 
-    // 标记内容对话框
+    // 标记内容对话框rgb(169, 169, 169)
     .tagDialog {
     }
     // 下载记录对话框
@@ -1184,105 +1073,13 @@ export default {
         }
     }
 
-    // 群成员对话框
-    .groupDialog {
-        .group_dialog {
-            .group_btn {
-                display: flex;
-                justify-content: center;
-                .label_item {
-                    color: #409eff;
-                    border: 1px solid #409eff;
-                    padding: 8px 51px;
-                    &.label_active {
-                        color: #fff;
-                        background-color: #409eff;
-                        transition: 0.3s;
-                    }
-                }
-            }
-            .group_list {
-                margin-top: 20px;
-                overflow-y: auto;
-                height: calc(60vh - 50px);
-                .staff_list_item {
-                    padding: 15px 15px 0px;
-                    border-top: 2px solid #e4e7ed;
-                    .item_top {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        .top_div {
-                            display: flex;
 
-                            .item_img {
-                                width: 45px;
-                                height: 45px;
-                                background-color: lightgray;
-                                img {
-                                    width: 100%;
-                                    height: 100%;
-                                    object-fit: contain;
-                                }
-                                .not_img {
-                                    width: 100%;
-                                    height: 100%;
-                                    text-align: center;
-                                    line-height: 45px;
-                                }
-                            }
-                            .top_name {
-                                margin-left: 10px;
-                                .first_name {
-                                    font-size: 17px;
-                                    font-weight: bold;
-                                }
-                                .nick_name {
-                                    font-size: 16px;
-                                    color: #bfbfbf;
-                                    max-width: 100px;
-                                    white-space: nowrap;
-                                    text-overflow: ellipsis;
-                                    overflow: hidden;
-                                }
-                            }
-                        }
-                    }
-                    .item_bottom {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: flex-end;
-                        margin: 10px 0px 10px;
-                        .bottom_mark {
-                            font-size: 12px;
-                            font-weight: bold;
-                        }
-                        .bottom_whether {
-                            color: #557b08;
-                            background-color: #c4e2c9;
-                            border-radius: 5px;
-                            font-size: 12px;
-                            line-height: 12px;
-                            padding: 5px;
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
-// 聊天记录对话框
+// 聊天记录弹窗
 .record_dialog_popper {
-    top: 179px;
-    left: 604px;
-    /deep/ .el-popover__title {
-        margin-bottom: 15px;
-        padding: 10px;
-    }
 
     .record_dialog {
         height: 60vh;
-        // overflow: auto;
         .record_search {
             display: flex;
             justify-content: space-around;
@@ -1444,6 +1241,94 @@ export default {
                         height: 8px;
                         border-radius: 50%;
                         background-color: #1296db;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 查看群成员弹窗
+.group_dialog_popper {
+
+    .group_dialog {
+        .group_btn {
+            display: flex;
+            justify-content: center;
+            .label_item {
+                color: #409eff;
+                border: 1px solid #409eff;
+                padding: 8px 51px;
+                &.label_active {
+                    color: #fff;
+                    background-color: #409eff;
+                    transition: 0.3s;
+                }
+            }
+        }
+        .group_list {
+            margin-top: 20px;
+            overflow-y: auto;
+            height: calc(60vh - 50px);
+            .staff_list_item {
+                padding: 15px 15px 0px;
+                border-top: 2px solid #e4e7ed;
+                .item_top {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    .top_div {
+                        display: flex;
+
+                        .item_img {
+                            width: 45px;
+                            height: 45px;
+                            background-color: lightgray;
+                            img {
+                                width: 100%;
+                                height: 100%;
+                                object-fit: cover;
+                            }
+                            .not_img {
+                                width: 100%;
+                                height: 100%;
+                                text-align: center;
+                                line-height: 45px;
+                            }
+                        }
+                        .top_name {
+                            margin-left: 10px;
+                            .first_name {
+                                font-size: 17px;
+                                font-weight: bold;
+                            }
+                            .nick_name {
+                                font-size: 16px;
+                                color: #bfbfbf;
+                                max-width: 100px;
+                                white-space: nowrap;
+                                text-overflow: ellipsis;
+                                overflow: hidden;
+                            }
+                        }
+                    }
+                }
+                .item_bottom {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                    margin: 10px 0px 10px;
+                    .bottom_mark {
+                        font-size: 12px;
+                        font-weight: bold;
+                    }
+                    .bottom_whether {
+                        color: #557b08;
+                        background-color: #c4e2c9;
+                        border-radius: 5px;
+                        font-size: 12px;
+                        line-height: 12px;
+                        padding: 5px;
                     }
                 }
             }

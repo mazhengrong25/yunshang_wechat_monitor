@@ -2,7 +2,7 @@
  * @Description: 侧边栏
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 16:44:46
- * @LastEditTime: 2021-05-24 14:01:24
+ * @LastEditTime: 2021-05-27 11:17:46
  * @LastEditors: mzr
 -->
 <template>
@@ -72,11 +72,12 @@ export default {
   /deep/ .el-menu {
     width: 100% !important;
     height: 100% !important; 
-  
+    background-color: #2E323E !important;
     .el-menu-item {
       display: flex;
       justify-content: center;
       font-size: 16px;
+      background-color: #2E323E !important;
       .el-submenu__title {
         margin: 17px;
       }
