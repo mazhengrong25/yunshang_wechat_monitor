@@ -2,12 +2,12 @@
  * @Description: 群聊列表 个人信息展示
  * @Author: mzr
  * @Date: 2021-05-27 10:23:29
- * @LastEditTime: 2021-05-28 11:36:13
+ * @LastEditTime: 2021-05-31 14:30:02
  * @LastEditors: mzr
 -->
 <template>
 
-  <!-- <el-dialog
+  <el-dialog
         custom-class="groupDialog" 
         width="800px"
         :visible.sync="showDialog"
@@ -23,12 +23,16 @@
         <div class="group_content">
             
         </div>
-    </el-dialog> -->
+    </el-dialog>
     
-    <el-popover  popper-class="group_dialog_popper" placement="right-start" trigger="click"  :v-model="showDialog">
-        <!-- <div>123</div> -->
-        <div slot="title"  class="group_title"></div>
-    </el-popover>
+    <!-- <el-popover  
+      popper-class="group_dialog_popper" 
+      placement="right-start" 
+      trigger="click"  
+      v-model="showDialog" 
+      ref="popover-click">
+       
+    </el-popover> -->
     
     
 </template>
@@ -57,7 +61,21 @@ export default {
         // 子组件关闭   关闭前的回调
         closeDialog(){
             this.$emit('closeModal')
-        }
+        },
+
+        // 获取用户信息
+        // getPersonMessage() {
+        //     let data = {
+        //        userid: 
+        //     }
+        //     this.$axios.post('/WxChat/GetAllUserList', data).then((res) => {
+        //         if (res.data.status === 0 && res.data.body.result.length > 0) {
+                   
+        //         } else {
+        //             this.$message.error(res.data.message)
+        //         }
+        //     })
+        // }
     },
 
     // mounted(){

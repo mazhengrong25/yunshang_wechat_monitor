@@ -2,7 +2,7 @@
  * @Description: 聊天存档列表 ---- 聊天记录
  * @Author: mzr
  * @Date: 2021-04-28 14:27:48
- * @LastEditTime: 2021-05-27 18:05:12
+ * @LastEditTime: 2021-06-04 15:36:23
  * @LastEditors: mzr
 -->
 <template>
@@ -13,9 +13,7 @@
       </div>
       <!-- 列表 -->
       <div class="record_list">
-           <el-table
-                :data="recordList"
-            >
+           <el-table :data="recordList">
                 <el-table-column
                     min-width="50%"
                     label="发送人">
@@ -93,7 +91,7 @@
             </div>
             <!-- 内容 -->
             <div class="dialog_content">
-                <SituationDialogue :recordList="chatList"></SituationDialogue>
+                <SituationChat v-bind:recordList="chatList"></SituationChat>
             </div>
       </el-dialog>
   </div>
@@ -111,7 +109,7 @@ export default {
     },
     components: {
         
-        SituationDialogue: () => import("./situationDialogue"), // 聊天对话
+        SituationChat: () => import("./situationChat"), // 聊天对话
     },
     data() {
         return {
@@ -128,9 +126,11 @@ export default {
                 pageCurrent: 1 // 当前页数
             },
 
-            detailMessage: {}, //对话框表头
+            detailMessage: {}, // 表格每一条数据
 
             chatList:[], // 聊天记录数据
+
+            thisPassnegerList: [], // userid集合
 
         }
     },
@@ -138,10 +138,15 @@ export default {
 
         // 只查看员工发送
         checkChange(e) {
-            console.log(e)
+
             this.checkAction = e
             this.getChatList();
             
+        },
+
+        // 表格翻页
+        changePageIndex(){
+            this.getChatList()
         },
 
         // 获取列表
@@ -168,32 +173,84 @@ export default {
             })
         },
 
-        // 表格翻页
-        changePageIndex(){
-            this.getChatList()
-        },
-
-        // 进入详情
+        // 获取详细聊天   val 表格一条数据
         openDetail(val) {
             console.log('详情',val)
+            // 对话框弹起 
             this.showDetail = true;
             this.detailMessage = val
+
             let data = {
                 sessionid: val.sessionid,
                 pageSize: 50,
                 pageIndex: 1,
             }
-            this.$axios.post('/WxChat/GetUserChat', data).then((res) => {
-             
-                if (res.data.status === 0 && res.data.body.result.length > 0) {
-                    this.chatList = res.data.body.result
-                    // 判断是发送方还是接收方
-                    this.chatList.forEach(item => {
-                        
-                        item['type'] = item.name === this.detailMessage.name && item.userid === this.detailMessage.userid ? 2 : 1
 
+            let passengerList = []
+
+            this.$axios.post('/WxChat/GetUserParticularChat',data).then((res) => {
+                if(res.data.status === 0 && res.data.body.result.length > 0) {
+
+                    let newRecordList = []
+                    newRecordList = res.data.body.result
+                    
+                    newRecordList.forEach(item => {
+                        
+                        passengerList.push(item.from || item.to)
+                        item['name'] = item.from                                         // 聊天对话组件 名字
+                        item['type'] = item.from === this.detailMessage.userid ? 2 : 1   // 聊天对话组件 接收方还是发送方
+
+                        // 转发对话框组件  群聊
+                        if(item.contentType === 'mixed' && item.receiver.length > 1) {   
+                            item['groupMessageForward'] = true
+                        }
+                        // 转发对话框组件  单个
+                        if(item.contentType === 'mixed' && item.receiver[0] !== this.detailMessage.userid) {
+                            item['singleForward'] = true
+                        }
                     })
-                    console.log(this.chatList)
+
+                    // 去重
+                    this.thisPassnegerList = [...new Set(passengerList)]
+                    // 处理聊天对话组件
+                    this.getUserMessageData('', newRecordList, 'from')
+                        .then(text => {
+                            this.chatList = text
+                        })
+
+                }else {
+
+                    this.$message.error(res.data.message)
+                }
+            })
+        },
+
+        // 获取用户信息   e 群聊个人信息  
+        getUserMessageData(e,val, type) {
+            console.log(val, '传参' )
+            let data = {
+                userid: e ? e.userid : String(this.thisPassnegerList)
+            }
+            return this.$axios.post('/WxChat/GetAllUserList', data).then((res) => {
+
+                if (res.data.status === 0 && res.data.body.length > 0) {
+                    
+                    for (let i = 0; i < val.length; i++) {
+                        for (let o = 0; o < res.data.body.length; o++) {
+                            // 聊天对话组件 名字 头像
+                            if (val[i][type] === res.data.body[o].userid) {
+                                val[i]['name'] = res.data.body[o].name
+                                val[i]['photoUrl'] = res.data.body[o].avatar
+                            }
+                            // 转发对话框组件 两个人
+                            if (val[i].receiver && val[i].receiver.length > 0 && val[i].receiver[0] === res.data.body[o].userid) {
+                                val[i]['masterName'] = res.data.body[o].name
+                            }
+                        }
+                    }
+
+                    return val
+
                 } else {
                     this.$message.error(res.data.message)
                 }

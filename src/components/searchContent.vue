@@ -2,7 +2,7 @@
  * @Description: 搜索聊天记录 --- 搜索内容
  * @Author: mzr
  * @Date: 2021-05-20 15:59:08
- * @LastEditTime: 2021-05-26 15:51:32
+ * @LastEditTime: 2021-06-01 14:12:58
  * @LastEditors: mzr
 -->
 <template>
@@ -77,17 +77,13 @@ export default {
             border-bottom: 2px solid #e4e7ed;
             padding: 0px 10px;
             cursor: pointer;
-            // &:hover {
-            //     cursor: pointer;
-            //     background-color: #ebeef5;
-            // }
             .item_left {
                 .left_name {
 
                 }
                 .left_content {
                     margin: 15px 0px 10px;
-                    max-width: 80%;
+                    // max-width: 80%;
                 }
             }
         }

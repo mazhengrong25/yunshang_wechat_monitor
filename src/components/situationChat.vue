@@ -2,7 +2,7 @@
  * @Description: 聊天对话
  * @Author: mzr
  * @Date: 2021-05-27 13:59:10
- * @LastEditTime: 2021-05-27 15:29:46
+ * @LastEditTime: 2021-06-04 14:38:58
  * @LastEditors: mzr
 -->
 <template>
@@ -18,7 +18,7 @@
                     <p>{{item.name}} {{item.contentTime}}</p>
                     <div :class="item.contentType === 'emotion' || item.contentType === 'image' ?'sender_right_bubble not_background':'sender_right_bubble'">
                         <div class="withdraw" v-if="item.contentType === 'revoke'">此消息已撤回</div>
-                        <DialogForward v-if="item.contentType === 'mixed'" :dialogList="item"></DialogForward>
+                        <ForwardChat v-if="item.contentType === 'mixed'" :dialogList="item"></ForwardChat>
 
                         <el-image 
                             :z-index="2500" 
@@ -35,21 +35,23 @@
                 </div>
                 <div class="sender_item_pic">
                     <img v-if="item.photoUrl" :src="item.photoUrl" />
-                    <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                    <img v-else :src="require('@/static/group_avatar.png')" alt="本地图片" /> 
+                    <!-- <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div> -->
                 </div>
             </div>
             <!-- 接收方 -->
             <div v-else class="dialog_item">
                 <div class="item_pic">
                     <img v-if="item.photoUrl" :src="item.photoUrl" />
-                    <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                    <img v-else :src="require('@/static/group_avatar.png')" alt="本地图片" /> 
+                    <!-- <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div> -->
                 </div>
                 <div class="item_right">
                     <p>{{item.contentTime}} {{item.name}}</p>
 
                     <div :class="item.contentType === 'emotion' || item.contentType === 'image' ?'right_bubble not_background':'right_bubble'">
 
-                        <DialogForward v-if="item.contentType === 'mixed'" :dialogList="item"></DialogForward>
+                        <ForwardChat v-if="item.contentType === 'mixed'" :dialogList="item"></ForwardChat>
 
                         <el-image 
                             :z-index="2500" 
@@ -72,7 +74,7 @@
 <script>
 export default {
     components: {
-        DialogForward: () => import("./dialogForward"),   // 转发对话框
+        ForwardChat: () => import("./forwardChat"),   // 转发对话框
     },
     props: {
         // 聊天对话列表
@@ -95,17 +97,17 @@ export default {
 
 <style lang="less" scoped>
 .dialogue_content {
-    .content_date {
-        display: flex;
-        justify-content: center;
-        margin-top: 15px;
-        .date_item {
-            color: darkgray;
-            font-size: 10px;
-            background-color: lightgray;
-            padding: 2px 5px;
-        }
-    }
+    // .content_date {
+    //     display: flex;
+    //     justify-content: center;
+    //     margin-top: 15px;
+    //     .date_item {
+    //         color: darkgray;
+    //         font-size: 10px;
+    //         background-color: lightgray;
+    //         padding: 2px 5px;
+    //     }
+    // }
     .left_message {
         .dialog_item {
             padding: 15px;

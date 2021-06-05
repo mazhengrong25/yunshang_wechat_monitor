@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-05-27 17:25:23
+ * @LastEditTime: 2021-06-04 15:47:23
  * @LastEditors: mzr
 -->
 <template>
@@ -17,7 +17,7 @@
                     <div class="left_back_item">
                         <div class="back_image not_background">
                             <img v-if="userMessage.avatar" :src="userMessage.avatar" />
-                            <img v-else src="../static/group_avatar.png" />
+                            <img v-else :src="require('@/static/group_avatar.png')" alt="本地图片" />
                         </div>
                         <div class="back_explain">
                             <div class="explain_name">{{userMessage.name}}</div>
@@ -32,40 +32,75 @@
                 <div v-if="listType === '群聊'">
                     <div class="group_pane">
                         <el-tabs v-model="activeGroupName" @tab-click="changeGroupTabs">
-                            <el-tab-pane 
-                                v-for="(oitem, oindex) in groupTypeArr" 
-                                :key="oindex" 
-                                :label="oitem.name" 
-                                :name="oitem.value"
-                            >
+                            <el-tab-pane v-for="(oitem, oindex) in groupTypeArr" :key="oindex" :label="oitem.name" :name="oitem.value">
 
                                 <div class="staff_content_list">
                                     <div class="staff_title">
                                         群内共有{{activeGroupName === oitem.name?getGroupData(true).length:(groupList.length - getGroupData(true).length)}}个{{oitem.name}}
                                     </div>
                                     <div class="staff_list_item_total">
-                                        <div class="staff_list_item" 
-                                            v-for="(item,index) in getGroupData(true)" :key="index" 
-                                            @click="groupDetail(item)"
-                                        >
-                                            <div class="item_top">
-                                                <div class="top_div">
-                                                    <div class="item_img">
-                                                        <img v-if="item.avatar" :src="item.avatar" />
-                                                        <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                        <div class="staff_list_item" v-for="(item,index) in getGroupData(true)" :key="index" @click="groupDetail(item)">
+                                            <el-popover popper-class="person_dialog_popper" placement="right" trigger="click">
+                                                <!-- 个人信息展示 这里的v-if是确保val.length > 0 -->
+                                                <div class="person_dialog" v-if="personList[0]">
+
+                                                    <div class="person_popover_title">
+                                                        <div class="title_img">
+                                                            <img v-if="personList[0].avatar" :src="personList[0].avatar" />
+                                                            <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                                        </div>
+                                                        <div class="title_content">
+                                                            <p>{{personList[0].name}}
+
+                                                                <i :style="item.gender === '1'?'color: #1296db':'color:#d4237a'" class="element-icons el-iconcao-flat-sex"></i>
+                                                            </p>
+                                                            <p>{{personList[0].userid}}</p>
+                                                        </div>
                                                     </div>
-                                                    <div class="top_name">
-                                                        <div class="first_name">{{item.name}}</div>
-                                                        <div class="nick_name">{{item.userid}}</div>
+                                                    <div class="person_popover_content" v-loading="dataLoading">
+                                                        <div class="content_item">
+                                                            <div class="item_title">手机：</div>
+                                                            <div class="item_input">{{personList[0].mobile ? personList[0].mobile : '无'}}</div>
+                                                        </div>
+                                                        <div class="content_item">
+                                                            <div class="item_title">邮箱：</div>
+                                                            <div class="item_input">{{personList[0].email ? personList[0].email : '无'}}</div>
+                                                        </div>
+                                                        <div class="content_item">
+                                                            <div class="item_title">部门：</div>
+                                                            <div class="item_input">{{personList[0].main_department ? personList[0].main_department : '无'}}</div>
+                                                        </div>
+                                                        <div class="content_item">
+                                                            <div class="item_title">职位：</div>
+                                                            <div class="item_input">{{personList[0].position ? personList[0].position : '无'}}</div>
+                                                        </div>
+
                                                     </div>
                                                 </div>
-                                                <i :style="item.gender === '1'?'color: #1296db':'color:#d4237a'" class="element-icons el-iconcao-flat-sex"></i>
-                                            </div>
-                                            <div class="item_bottom">
-                                                <div class="bottom_mark">{{item.personnelType ? item.personnelType:'员工'}}</div>
-                                                <div class="bottom_whether" v-if="item.memberType === '群主'">群主</div>
-                                            </div>
+
+                                                <!-- 群聊列表展示 -->
+                                                <div slot="reference">
+                                                    <div class="item_top">
+                                                        <div class="top_div">
+                                                            <div class="item_img">
+                                                                <img v-if="item.avatar" :src="item.avatar" />
+                                                                <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
+                                                            </div>
+                                                            <div class="top_name">
+                                                                <div class="first_name">{{item.name}}</div>
+                                                                <div class="nick_name">{{item.userid}}</div>
+                                                            </div>
+                                                        </div>
+                                                        <i :style="item.gender === '1'?'color: #1296db':'color:#d4237a'" class="element-icons el-iconcao-flat-sex"></i>
+                                                    </div>
+                                                    <div class="item_bottom">
+                                                        <div class="bottom_mark">{{item.personnelType ? item.personnelType:'员工'}}</div>
+                                                        <div class="bottom_whether" v-if="item.memberType === '群主'">群主</div>
+                                                    </div>
+                                                </div>
+                                            </el-popover>
                                         </div>
+
                                     </div>
                                 </div>
                             </el-tab-pane>
@@ -89,7 +124,7 @@
                                         <div class="list_item" v-for="(item,index) in chatList" :key="index" @click="chatDetail(item)">
                                             <div class="item_img not_background">
                                                 <img v-if="item.photoUrl" :src="item.photoUrl" />
-                                                <img  v-if="item.cahtType === 'GROUP'" src="../static/group_avatar.png" /> 
+                                                <img v-if="item.cahtType === 'GROUP'" src="../static/group_avatar.png" />
                                             </div>
 
                                             <div class="item_right">
@@ -114,16 +149,26 @@
                     <div class="right_action_item">
                         <div class="action_icon"></div>
                         <div class="action_title">联系人已同意聊天记录存档</div>
-                        <div class="action_message" v-if="listType === '员工'" @click="openTagDialog"><i class="element-icons el-iconbiaoji"></i></div>
+                        <div class="action_message" v-if="listType === '员工'" @click="openPrompt">
+                            <i class="element-icons el-iconbiaoji"></i>
+                        </div>
                     </div>
                     <div class="right_action_item">
-                        <div class="action_load" @click="openLoadDialog">
+                        <div class="action_load" @click="openPrompt">
                             <i class="el-icon-download"></i>
                             <span>下载</span>
                         </div>
                         <!-- 搜索记录按钮 -->
                         <div class="action_search">
-                            <el-popover title="搜索聊天记录" popper-class="record_dialog_popper" placement="bottom" trigger="click" transition="fade-in-linear">
+                            <el-button type="primary" @click="openMessageDialog">搜索记录</el-button>
+                            <el-dialog 
+                                custom-class="record_dialog_popper"
+                                title="搜索聊天记录" 
+                                :visible.sync="showSearch" 
+                                :modal="false"
+                                :destroy-on-close="true"
+                                width="520px"
+                            >
 
                                 <div class="record_dialog">
                                     <div class="record_search">
@@ -141,11 +186,10 @@
                                             <el-tab-pane label="日历" name="calendar">
                                                 <el-calendar class="record_calendar" v-model="calendarValue">
                                                     <template slot="dateCell" slot-scope="{data}">
-                                                        <div class="ys_calendar_day" @click="jumpDate(data)">
+                                                        <div :class="['ys_calendar_day',{'is_active': $moment(data.day).isBefore(new Date())}]" @click="jumpDate(data)">
                                                             {{$moment(data.day).format('D')}}
                                                             <div class="item_dotted" 
-                                                                v-for="(item,index) in dayTime"
-                                                                :key="index" 
+                                                                v-for="(item,index) in dayTime" :key="index" 
                                                                 v-if="$moment(data.day).format('YYYY-MM-DD') === $moment(item.value).format('YYYY-MM-DD')"></div>
 
                                                         </div>
@@ -160,23 +204,20 @@
                                                             <!-- :style="item.msgtype === 'emotion' ?`width:${item.width}px;height: ${item.height}px`:''" -->
                                                             <div class="image_self">
                                                                 <el-image 
-                                                                    :z-index="2500"
-                                                                    lazy
+                                                                    :z-index="3000" 
                                                                     fit="contain" 
                                                                     style="width: 100%; height: 100%" 
                                                                     :preview-src-list="[$imgUrl + item.resourcePath]" 
-                                                                    :src="$imgUrl + item.resourcePath"
-                                                                    @click.stop="closeImage"
-                                                                >
+                                                                    :src="$imgUrl + item.resourcePath">
                                                                 </el-image>
                                                             </div>
-                                                            <div class="image_source">{{item.sendChatName}}</div>
+                                                            <div class="image_source">{{item.name}}</div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </el-tab-pane>
                                             <el-tab-pane label="文件" name="file">
-                                                <div class="record_tags_file">
+                                                <!-- <div class="record_tags_file">
                                                     <div class="file_date">2021-3-26</div>
                                                     <div class="file_list" v-for="(item,index) in fileList" :key="index">
                                                         <div class="list_item">
@@ -190,14 +231,14 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
                                             </el-tab-pane>
                                             <el-tab-pane label="链接" name="link">
                                                 <div class="record_tags_link" v-for="(item,index) in sumList" :key="index">
                                                     <div class="link_date">{{$moment(Number(item.sendDate)).format('YYYY-MM-DD')}}</div>
                                                     <div class="link_list">
                                                         <div class="link_add"><a href="target">{{item.chatContent}}</a></div>
-                                                        <div class="link_source">{{item.sendChatName}}</div>
+                                                        <div class="link_source">{{item.name}}</div>
                                                     </div>
                                                 </div>
                                             </el-tab-pane>
@@ -205,16 +246,14 @@
 
                                     </div>
                                 </div>
-
-                                <el-button slot="reference" type="primary" @click="openMessageDialog">搜索记录</el-button>
-                            </el-popover>
+                            </el-dialog>     
                         </div>
-                        
+
                         <!-- 查看群成员弹窗 -->
                         <div class="action_client">
 
-                            <el-popover title="查看群成员" width="400" popper-class="group_dialog_popper" placement="bottom-end"  trigger="click">
-                                
+                            <el-popover title="查看群成员" width="400" popper-class="group_dialog_popper" placement="bottom-end" trigger="click">
+
                                 <div class="group_dialog">
                                     <div class="group_radio">
                                         <div class="group_btn">
@@ -246,18 +285,18 @@
                                 </div>
 
                                 <!-- v-if惰性加载 换为v-show -->
-                                <div class="client_icon" slot="reference"  @click="openGroupDialog" v-show="isGroup === 'GROUP'">
+                                <div class="client_icon" slot="reference" @click="openGroupDialog" v-show="isGroup === 'GROUP'">
                                     <i class="element-icons el-iconqiweiqunchengyuan"></i>
                                 </div>
-                                
+
                             </el-popover>
-  
+
                         </div>
                     </div>
                 </div>
                 <!-- 聊天对话 -->
                 <div class="right_content">
-                    <SituationDialogue :recordList="recordList"></SituationDialogue>
+                    <SituationChat v-bind:recordList="recordList"></SituationChat>
                 </div>
 
             </div>
@@ -276,6 +315,12 @@
             </span>
         </el-dialog>
 
+        <!-- <DialogDemo 
+            :dialogTitle="tagTitle"
+            :showDialog="showTag"
+            :dialogType="true"
+            @closeModal="closeTagDialog"
+        ></DialogDemo> -->
         <!-- 
             ------------员工------------
             下载聊天记录对话框 -->
@@ -291,8 +336,13 @@
             </span>
         </el-dialog>
 
-        <!-- 群聊弹窗 -->
-        <GroupDialog :showDialog="showGroup" :titleMessage="showGroupData" @closeModal="closeGroupDialog"></GroupDialog>
+        <!-- <DialogDemo 
+            :dialogTitle="loadTitle"
+            :showDialog="showLoad"
+            @closeModal="closeLoadDialog"
+        >
+        </DialogDemo> -->
+
     </div>
 </template>
 
@@ -300,14 +350,15 @@
 export default {
     components: {
         SearchContent: () => import("../components/searchContent"),   // 搜索聊天内容
-        GroupDialog: () => import("../components/groupDialog"),       // 群聊列表  个人信息展示
-        SituationDialogue: () => import("../components/situationDialogue"), // 聊天对话
+        SituationChat: () => import("../components/situationChat"), // 聊天对话
+        // DialogDemo: () => import("../components/dialogDemo"),  // 对话框
     },
     data() {
         return {
- 
+
             isGroup: '', // 判断当前窗口类型    ONEBYONE私聊  GROUP群聊
             thatSessionid: '', // 当前打开搜索记录的聊天人ID
+            groupId: '', // 群聊id
 
             listType: "", // 列表类型  员工 客户 群聊
             userMessage: {}, // 用户信息 
@@ -327,6 +378,16 @@ export default {
             showTag: false, // 标记内容
             showLoad: false, // 下载
             showGroup: false, // 群聊列表 弹窗
+
+            showSearch: false, // 搜索
+
+            tagTitle: "添加标记内容",
+            loadTitle: "下载聊天记录",
+            dialogType:"tag",
+
+            // 加载数据 群聊
+            dataLoading: true,
+
 
 
             // 私聊群聊列表标签
@@ -355,21 +416,22 @@ export default {
             chatList: [],       // 存放私聊群聊
             recordList: [],     // 聊天记录对话
             groupList: [],      // 存放群聊
-            showGroupData:{},   // 群聊组件信息
+            personList: [],     // 存放群聊单个信息
 
 
             // 搜索记录 弹窗
             sumList: [],                // 图片视频链接
             dayTime: [],                // 日期列表
             calendarValue: new Date(),  // 日历
-            fileList: [
-                {
-                    name: "秘密花园",
-                    format: "word",
-                    source: "美少女战士",
-                    size: "2.6M"
-                },
-            ],  // 文件列表
+            // 文件列表
+            // fileList: [
+            //     {
+            //         name: "秘密花园",
+            //         format: "word",
+            //         source: "美少女战士",
+            //         size: "2.6M"
+            //     },
+            // ],
 
             // 下载 弹窗
             starTime: "", //  开始时间
@@ -378,6 +440,7 @@ export default {
             // 群成员 弹窗
             groupTypeBtn: "员工", // 默认值 员工
 
+            thisPassnegerList: [], // userid集合
 
         }
     },
@@ -388,9 +451,11 @@ export default {
             this.$router.go(-1);
         },
 
-        // 获取对应聊天列表
+        // 获取对应聊天列表 
         getChatList() {
+
             this.chatList = []
+
             let data = {
                 userid: this.userMessage.userid,
                 chatType: this.activeName === 'ALL' ? "" : this.activeName
@@ -409,7 +474,7 @@ export default {
             })
         },
 
-        // 对应列表标签页 选中
+        // 私聊群聊标签页 选中
         changeChatTabs() {
             this.getChatList()
         },
@@ -422,7 +487,7 @@ export default {
         // 列表筛选
         async listFilter() {
             if (this.inputSearch) {
-                console.log('输入',this.inputSearch)
+                console.log('输入', this.inputSearch)
                 let data = [];
                 await this.chatList.forEach(item => {
                     if (item.name.indexOf(this.inputSearch) !== -1 ||
@@ -438,50 +503,131 @@ export default {
 
         },
 
-        // 获取聊天对话
+        // 获取聊天对话  val 每一条数据  type(true false) true表示从日历进入相关天数到对应界面位置
         chatDetail(val, type) {
-            // 存用户对应详细内容
+
             if (val) {
+
                 this.dialogItem = val
+                this.groupId = val.cahtType === "GROUP" ? val.userid : "";  // 群聊  查看群成员
+
             } else if (!type) {
+                this.groupId = ''
                 this.dialogItem = this.chatList[0]
             }
 
             console.log('dialogItem', val)
-            // 聊天记录弹窗  聊天人id 
-            this.thatSessionid = val ? val.group : this.chatList[0].group
-            // 查看群成员弹窗
-            this.isGroup = val ? val.cahtType : this.chatList[0].cahtType
+
             let data = {
-                sessionid: val ? val.group : this.chatList[0].group,
                 pageSize: 50,
                 pageIndex: 1,
-                startdate: val ? val.endTime : this.chatList[0].endTime
             }
-            this.$axios.post('/WxChat/GetUserChat', data).then((res) => {
+
+            // 区分群聊 私聊
+            if (this.listType === '群聊') {
+                data['sessionid'] = this.userMessage.userid
+            } else {
+                data['sessionid'] = val ? val.sessionid : this.chatList[0].sessionid
+                data['startdate'] = val ? val.endTime : this.chatList[0].endTime
+                // 聊天记录弹窗  聊天人id 
+                this.thatSessionid = val ? val.sessionid : this.chatList[0].sessionid
+                // 查看群成员弹窗
+                this.isGroup = val ? val.cahtType : this.chatList[0].cahtType
+
+            }
+
+
+            let passengerList = []
+
+            this.$axios.post('/WxChat/GetUserParticularChat', data).then((res) => {
 
                 if (res.data.status === 0 && res.data.body.result.length > 0) {
-                    this.recordList = res.data.body.result
-                    console.log('对话聊天',this.recordList)
-                    // 判断是发送方还是接收方
-                    this.recordList.forEach(item => {
+                    let newRecordList
+                    newRecordList = res.data.body.result
+                    console.log('对话聊天', newRecordList)
 
-                        item['type'] = item.name === this.userMessage.name && item.userid === this.userMessage.userid ? 2 : 1
+                    newRecordList.forEach(item => {
+                        passengerList.push(item.from || item.to)
+                        item['name'] = item.from                                      // 聊天对话组件 名字
+                        item['type'] = item.from === this.userMessage.userid ? 2 : 1  // 聊天对话组件 接收方还是发送方
 
+                        // 转发对话框组件  群聊
+                        if (item.contentType === 'mixed' && item.receiver.length > 1) {
+                            item['groupMessageForward'] = true
+                        }
+                        // 转发对话框组件  单个
+                        if(item.contentType === 'mixed' && item.receiver[0] === item.from) {
+                            item['singleForward'] = true
+                        }
                     })
+
+                    // 去重
+                    this.thisPassnegerList = [...new Set(passengerList)]
+
+                    // 处理聊天对话组件 
+                    this.getUserMessageData('', newRecordList, 'from')
+                        .then(text => {
+                            this.recordList = text
+                        })
+
                 } else {
                     this.$message.error(res.data.message)
                 }
             })
         },
 
-        // 打开搜索记录弹窗
-        openMessageDialog() {
 
+        // 打开群聊列表对应弹窗
+        groupDetail(val) {
+
+            let data = {
+                userid: val.userid
+            }
+            this.getUserMessageData(data);
+            // this.chatDetail(val)
+        },
+
+        // 获取用户信息   e 群聊个人信息  type 装userid 判断参数是否和userid相等  val 
+        getUserMessageData(e, val, type) {
+
+            let data = {
+                userid: e ? e.userid : String(this.thisPassnegerList)
+            }
+            return this.$axios.post('/WxChat/GetAllUserList', data).then((res) => {
+
+                if (res.data.status === 0 && res.data.body.length > 0) {
+
+                    // 单个用户信息
+                    this.personList = res.data.body;
+                    this.dataLoading = false
+
+                    for (let i = 0; i < val.length; i++) {
+                        for (let o = 0; o < res.data.body.length; o++) {
+                            // 聊天对话组件 名字 头像
+                            if (val[i][type] === res.data.body[o].userid) {
+                                val[i]['name'] = res.data.body[o].name
+                                val[i]['photoUrl'] = res.data.body[o].avatar
+                            }
+                            // 转发对话框组件 两个人
+                            if (val[i].receiver && val[i].receiver.length > 0 && val[i].receiver[0] === res.data.body[o].userid) {
+                                val[i]['masterName'] = res.data.body[o].name
+                            }
+                        }
+                    }
+                    return val
+                } else {
+                    this.$message.error(res.data.message)
+                }
+            })
+        },
+
+        // 打开搜索记录对话框
+        openMessageDialog() {
+            this.showSearch = true
             this.getDateList();
         },
 
-        // 搜索聊天记录弹窗 标签页 
+        // 搜索聊天记录对话框 标签页 
         handleClick(tab, event) {
             if (tab.name === 'calendar') {
                 this.getDateList();
@@ -490,10 +636,10 @@ export default {
             }
         },
 
-        // 搜索聊天记录弹窗  获取聊天日期
+        // 搜索聊天记录对话框  获取聊天日期
         getDateList() {
             let data = {
-                sessionid: this.dialogItem.group,
+                sessionid: this.dialogItem.sessionid,
                 datetime: this.dialogItem.endTime
             }
             this.$axios.post('/WxChat/GetDateChatList', data).then((res) => {
@@ -505,8 +651,11 @@ export default {
             })
         },
 
-        // 搜索聊天记录弹窗  对应时间点位置
+        // 搜索聊天记录对话框  对应时间点位置
         async jumpDate(e) {
+            if(this.$moment(e.day).isAfter(new Date())){
+                return false
+            }
             console.log('日期', e)
             if (!e.day) {
                 return $message.error('时间错误')
@@ -516,21 +665,21 @@ export default {
             await this.chatDetail(data, true)
         },
 
-        // 搜索聊天记录弹窗  对应内容位置
+        // 搜索聊天记录对话框  对应内容位置
         async jumpContent(val) {
             console.log(val)
-            let data = { 
-                group: this.thatSessionid,
+            let data = {
+                sessionid: this.thatSessionid,
                 endTime: JSON.parse(JSON.stringify(this.$moment(Number(val.sendDate)).format('YYYY-MM-DD')))
             }
             console.log('内容时间', data)
             await this.chatDetail(data, true)
         },
 
-        // 搜索聊天记录   图片/链接
+        // 搜索聊天记录   图片/链接  type(true false) true 搜索类型为文字
         getRecordSearch(type) {
             let data = {
-                sessionid: this.dialogItem.group,
+                sessionid: this.dialogItem.sessionid,
                 pageSize: 15,
                 pageIndex: 1,
                 searchType: type ? 'text' : this.activeRecordName,
@@ -538,9 +687,11 @@ export default {
             }
             this.$axios.post('/WxChat/GetUserSearchChatList', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.result.length > 0) {
-                    // 图片/链接
-                    this.sumList = res.data.body.result
-                    // 内容
+                    // 图片/链接  处理工号 姓名
+                    this.getUserMessageData('', res.data.body.result, 'sendChatUserid').then(text => this.sumList = text)
+                    console.log('图片/链接', this.sumList)
+
+                    // 搜索内容
                     if (type) {
                         this.textSumList = res.data.body.result
                     }
@@ -550,30 +701,15 @@ export default {
             })
         },
 
-        // 搜索聊天记录  关闭图片
-        closeImage() {
-            console.log('关闭图片')
-            this.$nextTick(()=>{
-                // 获取遮罩层dom
-                let domImageMask = document.querySelector(".el-image-viewer__mask");
-                if (!domImageMask) {
-                    return;
-                }
-                domImageMask.addEventListener("click", () => {
-                    // 点击遮罩层时调用关闭按钮的 click 事件
-                    document.querySelector(".el-image-viewer__close").click();
-                });
-            })
-
-        },
-
         // 搜索内容  输入值取值
         contentSearch(e) {
             this.recordSearch = e.target.value
-            console.log(this.recordSearch)
         },
 
-
+        // 标记下载提示
+        openPrompt() {
+            this.$message('功能待开发，请敬请期待');         
+        },
         // 打开标记内容
         openTagDialog() {
             this.showTag = true
@@ -594,26 +730,28 @@ export default {
 
         // 打开群成员内容
         openGroupDialog() {
+            console.log('打开群聊')
             this.getGroupList();
         },
 
-        // 组装群成员信息
+        // 组装群成员信息 
         getGroupData(type) {
+            console.log('组装信息type', type, this.groupList)
             let data = []
-            if(type){
+            if (type) {
                 // 群聊人员列表传值 type为true判断是否与tabs值相等，输出对应值
                 this.groupList.forEach(item => {
-                if (item.personnelType.indexOf(this.activeGroupName) !== -1 ) {
-                    data.push(item)
-                }
-            })
-            }else {
+                    if (item.personnelType.indexOf(this.activeGroupName) !== -1) {
+                        data.push(item)
+                    }
+                })
+            } else {
                 // groupTypeBtn 群成员弹窗 筛选出员工 客户
                 this.groupList.forEach(item => {
-                if (item.personnelType.indexOf(this.groupTypeBtn) !== -1) {
-                    data.push(item)
-                }
-             })
+                    if (item.personnelType.indexOf(this.groupTypeBtn) !== -1) {
+                        data.push(item)
+                    }
+                })
             }
 
             return data
@@ -632,14 +770,13 @@ export default {
         // 获取群成员信息
         getGroupList() {
             let data = {
-                userid: this.userMessage.userid
+                userid: this.groupId ? this.groupId : this.userMessage.userid
             }
             this.$axios.post('/WxChat/GetGroupChatUser', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.length > 0) {
-                    
+
                     // 群成员列表
                     this.groupList = res.data.body
-
                     // 判断群主
                     let groupMaster = {}
                     for (let i = 0; i < this.groupList.length; i++) {
@@ -650,7 +787,6 @@ export default {
                         }
                     }
                     this.groupList.unshift(groupMaster)
-                    console.log(groupMaster)
 
                 } else {
                     this.$message.error(res.data.message)
@@ -659,45 +795,25 @@ export default {
             })
         },
 
-        // 打开群聊列表对应弹窗
-        groupDetail(e) {
-            console.log('群聊',e)
-            this.showGroup = true
-            this.showGroupData = e
-        },  
-        
-        // 关闭群聊弹窗
-        closeGroupDialog(){
-            this.showGroup = false
-        }                     
 
     },
     async created() {
+
         this.listType = this.$route.query.type // 列表类型
         this.userMessage = this.$route.query // 用户信息 
-        if(this.listType === '群聊'){
+        console.log(this.listType)
+        if (this.listType === '群聊') {
+            console.log('acion')
             await this.getGroupList() // 群聊列表
-        }else {
+            // await this.chatDetail()  // 获取当前群聊 聊天记录
+        } else {
             await this.getChatList() // 私聊 群聊列表
 
         }
     },
-    // mounted() {
-        
-    //         this.$nextTick(()=>{
-    //             // 获取遮罩层dom
-    //             let domImageMask = document.querySelector(".el-image-viewer__mask");
-    //             if (!domImageMask) {
-    //                 return;
-    //             }
-    //             domImageMask.addEventListener("click", () => {
-    //                 // 点击遮罩层时调用关闭按钮的 click 事件
-    //                 document.querySelector(".el-image-viewer__close").click();
-    //             });
-    //         })
+    mounted() {
 
-        
-    // }
+    }
 }
 </script>
 
@@ -785,8 +901,6 @@ export default {
                     width: 100%;
                 }
                 .pane_all_list {
-                    // overflow-y: auto;
-                    // height: 80vh;
                     .pane_title {
                         color: lightgrey;
                         font-size: 10px;
@@ -825,7 +939,7 @@ export default {
                                 padding-left: 10px;
                                 .item_top {
                                     &:not(:last-child) {
-                                         margin-bottom: 23px;
+                                        margin-bottom: 23px;
                                     }
                                     display: flex;
                                     justify-content: space-between;
@@ -846,16 +960,13 @@ export default {
                                     overflow: hidden;
                                     max-width: 200px;
                                 }
-
-                               
                             }
                             &:hover {
                                 cursor: pointer;
                                 background-color: #ebeef5;
                             }
-                           
+                        }
                     }
-                }
                 }
                 /deep/ .el-tabs__item {
                     padding: 0 41px;
@@ -1022,11 +1133,7 @@ export default {
                     }
                     .action_search {
                         position: relative;
-                        // .el-button {
-                        //     padding: 5px 10px;
-                        // }
                         .el-dialog__wrapper {
-                            position: absolute;
                             top: 57px;
                             right: 0;
                             bottom: unset;
@@ -1040,7 +1147,6 @@ export default {
                         cursor: pointer;
                         margin-left: 20px;
                         color: #1296db;
-                        // position: relative;
                         .el-dialog__wrapper {
                             position: absolute;
                             top: 197px;
@@ -1057,14 +1163,10 @@ export default {
                 width: auto;
                 overflow-y: auto;
                 height: calc(100vh - 167px);
-               
             }
         }
     }
 
-    // 标记内容对话框rgb(169, 169, 169)
-    .tagDialog {
-    }
     // 下载记录对话框
     .loadDialog {
         .el-date-editor.el-input,
@@ -1072,12 +1174,10 @@ export default {
             width: 160px;
         }
     }
-
-
 }
+
 // 聊天记录弹窗
 .record_dialog_popper {
-
     .record_dialog {
         height: 60vh;
         .record_search {
@@ -1117,9 +1217,6 @@ export default {
                             width: 80%;
                             padding: 0px 15px;
                             .item_top {
-                                // &:not(:last-child) {
-                                //     margin-bottom: 23px;
-                                // }
                                 display: flex;
                                 justify-content: space-between;
                                 align-items: center;
@@ -1150,9 +1247,6 @@ export default {
                     align-items: center;
                     .link_add {
                         max-width: 60%;
-                        // white-space: nowrap;
-                        // text-overflow: ellipsis;
-                        // overflow: hidden;
                     }
                     .link_source {
                         font-size: 10px;
@@ -1233,6 +1327,13 @@ export default {
                     height: 50px;
                     text-align: center;
                     line-height: 50px;
+                    &:not(.is_active){
+                        color: rgb(192, 196, 204);
+                        cursor: not-allowed;
+                        background-image: none;
+                        background-color: rgb(255, 255, 255);
+                        border-color: rgb(235, 238, 245);
+                    }
                     .item_dotted {
                         position: absolute;
                         right: 7px;
@@ -1250,7 +1351,6 @@ export default {
 
 // 查看群成员弹窗
 .group_dialog_popper {
-
     .group_dialog {
         .group_btn {
             display: flex;
@@ -1259,6 +1359,7 @@ export default {
                 color: #409eff;
                 border: 1px solid #409eff;
                 padding: 8px 51px;
+                cursor: pointer;
                 &.label_active {
                     color: #fff;
                     background-color: #409eff;
@@ -1336,4 +1437,58 @@ export default {
     }
 }
 
+// 群聊个人信息弹窗
+.person_dialog_popper {
+    
+    .person_dialog {
+        width: 300px;
+        .person_popover_title {
+            display: flex;
+            align-items: center;
+            margin-bottom:10px;
+            .title_img {
+                width: 45px;
+                height: 45px;
+                margin-right: 10px;
+                background-color: lightgray;
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                .not_img {
+                    width: 100%;
+                    height: 100%;
+                    line-height: 45px;
+                    text-align: center;
+                }
+            }
+            .title_content {
+                p {
+                    font-size: 16px;
+                    max-width: 187px;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+            }
+        }
+        .person_popover_content {
+            padding-top: 10px;
+            border-top: 1px solid #d0d0d0;
+            .content_item {
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                .item_title {
+                    color: #bfbfbf;
+                    font-size: 14px;
+                }
+                .item_input {
+                    max-width: 200px;
+                }
+            }
+        }
+    }
+}
 </style>

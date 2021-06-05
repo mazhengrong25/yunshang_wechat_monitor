@@ -2,15 +2,15 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-05-27 17:29:18
+ * @LastEditTime: 2021-06-04 16:05:45
  * @LastEditors: mzr
 -->
 
 <template>
     <div class="index">
-        <!-- 搜索筛选 -->
+        <!-- 聊天存档 聊天记录 切换-->
         <div class="content_top">
-            <div v-if="inputSearch" @click="closeSearch" class="back_icon">
+            <div class="back_icon" v-if="inputSearch" @click="closeSearch">
                 <i class="element-icons el-iconfanhui"></i>
             </div>
             <div class="top_title">{{inputSearch?'聊天记录':'聊天存档'}}</div>
@@ -20,7 +20,7 @@
                 </el-input>
             </div>
         </div>
-
+        <!-- 聊天存档 -->
         <div class="content_item" v-if="inputSearch === ''">
             <div class="item_action">
                 <!-- 列表类型 -->
@@ -57,7 +57,7 @@
             <div class="item_table">
                 <!-- 员工 -->
                 <el-table v-loading="tableLoading" :data="tableData" v-if="checkList === '员工'">
-                    <el-table-column show-overflow-tooltip label="员工微信">
+                    <el-table-column  label="员工微信">
                         <template slot-scope="scope">
                             <div class="table_wechat">
                                 <div class="table_img">
@@ -71,7 +71,7 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip label="工号/姓名">
+                    <el-table-column  label="工号/姓名">
                         <template slot-scope="scope">
                             <div class="table_staff">
                                 <div class="staff_no">{{byteLength(scope.row.userid)}}</div>
@@ -97,7 +97,7 @@
                     <el-table-column prop="gender" label="性别">
                         <template slot-scope="scope">
                             {{scope.row.gender === '1' ?'男':
-                                scope.row.gender === '2'?'女':''
+                                scope.row.gender === '2'?'女':'未定义'
                             }}
                         </template>
                     </el-table-column>
@@ -109,21 +109,22 @@
                 </el-table>
                 <!-- 客户 -->
                 <el-table v-loading="tableLoading" :data="tableData" v-if="checkList === '客户'">
-                    <el-table-column show-overflow-tooltip label="客户微信">
+                    <el-table-column label="客户微信" min-width="90%">
                         <template slot-scope="scope">
                             <div class="table_wechat">
                                 <div class="table_img">
                                     <img v-if="scope.row.avatar" :src="scope.row.avatar" />
                                     <div v-else class="not_img"><i class="element-icons el-icontupian1"></i></div>
                                 </div>
-                                <div class="table_item">
-                                    <div class="person_name">{{scope.row.name}}</div>
+                                <!-- style="text-align : center" -->
+                                <div class="table_item" style="display:flex; align-items:center;">
+                                     <div class="person_name">{{scope.row.name}}</div>
                                     <!-- <div class="wechat_no">{{byteLength(scope.row.userid)}}</div> -->
                                 </div>
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip label="所属客服">
+                    <el-table-column  label="所属客服">
                         <template slot-scope="scope">
                             <div class="table_staff">
                                 <!-- <div class="staff_no">{{byteLength(scope.row.userid)}}</div> -->
@@ -138,7 +139,7 @@
                             {{scope.row.groupchat}}
                         </template>
                     </el-table-column>
-                    <el-table-column prop="gender" label="性别">
+                    <el-table-column prop="gender" label="性别" >
                         <template slot-scope="scope">
                             {{scope.row.gender === '1' ?'男':
                                 scope.row.gender === '2'?'女':'未定义'
@@ -147,7 +148,7 @@
                     </el-table-column>
                     <el-table-column prop="label" label="标签">
                         <template slot-scope="scope">
-                            {{scope.row.label ? scope.row.label:""}}
+                            {{scope.row.label ? scope.row.label:"--"}}
                         </template>
                     </el-table-column>
                     <el-table-column label="聊天记录" min-width="40%">
@@ -158,41 +159,43 @@
                 </el-table>
                 <!-- 群聊 -->
                 <el-table v-loading="tableLoading" :data="tableData" v-if="checkList === '群聊'">
-                    <el-table-column show-overflow-tooltip label="群名称">
+                    <el-table-column show-overflow-tooltip label="群名称" min-width="35%">
                         <template slot-scope="scope">
                             <div class="table_wechat">
                                 <div class="table_img not_background">
                                     <img v-if="scope.row.avatar" :src="scope.row.avatar" />
-                                    <img v-else src="../static/group_avatar.png" /> 
+                                    <img v-else :src="require('@/static/group_avatar.png')" alt="本地图片" /> 
                                 </div>
                                 <div class="table_item">
-                                    <div class="person_name">{{scope.row.name}}</div>
+                                    <el-tooltip class="item" effect="dark" :content="scope.row.name" placement="bottom-start">
+                                        <div class="person_name">{{scope.row.name}}</div>
+                                    </el-tooltip>
                                     <!-- <div class="wechat_no">{{byteLength(scope.row.userid)}}</div> -->
                                 </div>
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip label="管理员">
+                    <el-table-column label="管理员" min-width="30%">
                         <template slot-scope="scope">
                             <div class="table_staff">
                                 <!-- <div class="staff_no">{{byteLength(scope.row.userid)}}</div> -->
-                                <div class="staff_name">{{scope.row.name}}</div>
+                                <div class="staff_name">{{scope.row.gruopOwner}}</div>
                             </div>
                         </template>
                     </el-table-column>
                     <!-- <el-table-column  label="分组" /> -->
-                    <el-table-column prop="externalUser" label="客户数">
+                    <el-table-column prop="externalUser" label="客户数" min-width="30%">
                         <template slot-scope="scope">
                             {{scope.row.externalUser}}
                         </template>
                     </el-table-column>
-                    <el-table-column prop="interiorUser" label="员工数">
+                    <el-table-column prop="interiorUser" label="员工数" min-width="30%">
                         <template slot-scope="scope">
                             {{scope.row.interiorUser ? scope.row.interiorUser:""}}
                         </template>
                     </el-table-column>
                     <!-- <el-table-column label="备注"></el-table-column> -->
-                    <el-table-column label="聊天记录" min-width="40%">
+                    <el-table-column label="聊天记录" min-width="15%">
                         <template slot-scope="scope">
                             <el-button type="primary" round @click="openDetail(scope.row)">查看</el-button>
                         </template>
@@ -207,7 +210,7 @@
                     @current-change="changePageIndex"></el-pagination>
             </div>
         </div>
-        <!-- 查询聊天记录 -->
+        <!-- 聊天记录 -->
         <div v-else>
             <ChatRecord :inputSearch="inputSearch"></ChatRecord>
         </div>
@@ -218,11 +221,11 @@
 export default {
     name: 'index',
     components: {
-        ChatRecord: () => import("../components/chatRecord")  //查询聊天记录页面
+        ChatRecord: () => import("../components/chatRecord")  // 聊天记录
     },
     data() {
         return {
-
+            
             inputSearch: "", // 搜索值
 
             // 搜索筛选条件
@@ -264,7 +267,12 @@ export default {
 
             // //////////////////////////////////////
             groupList: "", // 分组列表
-            options_group: [{
+            options_group: [
+            {
+                value: '0',
+                label: '默认'
+            },
+            {
                 value: '1',
                 label: '分组1'
             }, {
@@ -279,9 +287,14 @@ export default {
             }],
 
             tagList: "", // 标签列表  
-            options_tag: [{
+            options_tag: [
+            {
+                value: '0',
+                label: '默认'
+            },
+            {
                 value: '1',
-                label: '标签1'
+                label: '分组1'
             }, {
                 value: '2',
                 label: '标签2'
@@ -300,7 +313,7 @@ export default {
 
         // 跳转到对应详情
         openDetail(val) {
-            console.log('val', val)
+            console.log('表格对应详情', val)
             this.$router.push({
                 name: 'Detail',
                 path: "/detail",
@@ -349,7 +362,7 @@ export default {
                 search: this.searchData.jobNumber,
                 personneltype: this.checkList
             }
-            this.$axios.post('/WxChat/GetUserList', data).then((res) => {
+            this.$axios.post('/WxChat/GetAllUserChatList', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.result.length > 0) {
                     this.tableLoading = false;
                     this.tableData = res.data.body.result
@@ -433,6 +446,9 @@ export default {
                 /deep/ .el-radio__input.is-checked+.el-radio__label {
                     color: #0070e2;
                 }
+                /deep/ .el-radio__input.is-checked .el-radio__inner :hover {
+                   border-color: #0070e2 !important;
+                }
             }
             .action_item {
                 .el-select {
@@ -441,6 +457,7 @@ export default {
                 .el-input {
                     margin: 0px 20px;
                 }
+            
             }
         }
         .item_table {
@@ -465,7 +482,6 @@ export default {
                     flex-shrink: 0;
                     width: 45px;
                     height: 45px;
-                    background-color: lightgray;
                     margin-right: 10px;
                     img {
                         width: 100%;

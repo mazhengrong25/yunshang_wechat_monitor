@@ -24,7 +24,6 @@ img {
 
 // ui框架样式修改
 .el-container {
-  // height: calc(100vh - 60px);
   height: 100vh;
   .el-header {
     padding: 0;
@@ -68,16 +67,17 @@ img {
   background-color: #0070e2;
   border-color: #0070e2;
 }
+.el-button--primary:focus, .el-button--primary:hover {
+  background-color: #2482e2;
+  border-color: #2482e2;
+}
 
-// 弹出层 搜索记录 查看群成员
-// .el-popover .record_dialog_popper{
-//   top:190px !important;
-//   left: 1380px !important;
-// }
-// .el-popover .group_dialog_popper {
-//   top:190px !important;
-//   left: 1504px !important;
-// }
+// 单选框 
+.el-radio__inner:hover {
+  border-color: #2482e2;
+}
+
+// 弹出层 查看群成员 和vue组件平级
 .el-popover {
   margin-top: 30px;
   .el-popover__title {
@@ -85,5 +85,4 @@ img {
     padding: 15px;
   }
 }
-
 
