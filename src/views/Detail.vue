@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-06-04 15:47:23
+ * @LastEditTime: 2021-06-07 14:03:10
  * @LastEditors: mzr
 -->
 <template>
@@ -166,7 +166,6 @@
                                 title="搜索聊天记录" 
                                 :visible.sync="showSearch" 
                                 :modal="false"
-                                :destroy-on-close="true"
                                 width="520px"
                             >
 
@@ -201,7 +200,6 @@
                                                     <div class="image_date">{{$moment(Number(item.sendDate)).format('YYYY-MM-DD')}}</div>
                                                     <div class="image_list">
                                                         <div class="image_item">
-                                                            <!-- :style="item.msgtype === 'emotion' ?`width:${item.width}px;height: ${item.height}px`:''" -->
                                                             <div class="image_self">
                                                                 <el-image 
                                                                     :z-index="3000" 
@@ -237,7 +235,8 @@
                                                 <div class="record_tags_link" v-for="(item,index) in sumList" :key="index">
                                                     <div class="link_date">{{$moment(Number(item.sendDate)).format('YYYY-MM-DD')}}</div>
                                                     <div class="link_list">
-                                                        <div class="link_add"><a href="target">{{item.chatContent}}</a></div>
+                                                        <!-- <div class="link_add"><a href="target">{{item.chatContent}}</a></div> -->
+                                                        <div class="link_add"><a href="text.html" target="_blank">{{item.chatContent}}</a></div>
                                                         <div class="link_source">{{item.name}}</div>
                                                     </div>
                                                 </div>
@@ -601,16 +600,19 @@ export default {
                     this.personList = res.data.body;
                     this.dataLoading = false
 
-                    for (let i = 0; i < val.length; i++) {
-                        for (let o = 0; o < res.data.body.length; o++) {
-                            // 聊天对话组件 名字 头像
-                            if (val[i][type] === res.data.body[o].userid) {
-                                val[i]['name'] = res.data.body[o].name
-                                val[i]['photoUrl'] = res.data.body[o].avatar
-                            }
-                            // 转发对话框组件 两个人
-                            if (val[i].receiver && val[i].receiver.length > 0 && val[i].receiver[0] === res.data.body[o].userid) {
-                                val[i]['masterName'] = res.data.body[o].name
+                    if(val) {
+                        
+                        for (let i = 0; i < val.length; i++) {
+                            for (let o = 0; o < res.data.body.length; o++) {
+                                // 聊天对话组件 名字 头像
+                                if (val[i][type] === res.data.body[o].userid) {
+                                    val[i]['name'] = res.data.body[o].name
+                                    val[i]['photoUrl'] = res.data.body[o].avatar
+                                }
+                                // 转发对话框组件 两个人
+                                if (val[i].receiver && val[i].receiver.length > 0 && val[i].receiver[0] === res.data.body[o].userid) {
+                                    val[i]['masterName'] = res.data.body[o].name
+                                }
                             }
                         }
                     }
@@ -870,6 +872,11 @@ export default {
                             font-size: 15px;
                             font-weight: bold;
                             margin-bottom: 10px;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+                            overflow: hidden;
+                            max-width: 200px;
+
                         }
                         .explain_dep {
                             font-size: 10px;
