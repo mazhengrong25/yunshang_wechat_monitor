@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-06-07 14:03:10
+ * @LastEditTime: 2021-06-16 11:14:30
  * @LastEditors: mzr
 -->
 <template>
@@ -121,7 +121,7 @@
                                 <div class="pane_all_list">
                                     <div class="pane_title">共有{{chatList.length}}条会议</div>
                                     <div class="left_conver_list">
-                                        <div class="list_item" v-for="(item,index) in chatList" :key="index" @click="chatDetail(item)">
+                                        <div class="list_item" v-for="(item,index) in chatList" :key="index" @click="getChatDetail(item)">
                                             <div class="item_img not_background">
                                                 <img v-if="item.photoUrl" :src="item.photoUrl" />
                                                 <img v-if="item.cahtType === 'GROUP'" src="../static/group_avatar.png" />
@@ -161,13 +161,7 @@
                         <!-- 搜索记录按钮 -->
                         <div class="action_search">
                             <el-button type="primary" @click="openMessageDialog">搜索记录</el-button>
-                            <el-dialog 
-                                custom-class="record_dialog_popper"
-                                title="搜索聊天记录" 
-                                :visible.sync="showSearch" 
-                                :modal="false"
-                                width="520px"
-                            >
+                            <el-dialog custom-class="record_dialog_popper" title="搜索聊天记录" :visible.sync="showSearch" :modal="false" width="520px">
 
                                 <div class="record_dialog">
                                     <div class="record_search">
@@ -187,9 +181,7 @@
                                                     <template slot="dateCell" slot-scope="{data}">
                                                         <div :class="['ys_calendar_day',{'is_active': $moment(data.day).isBefore(new Date())}]" @click="jumpDate(data)">
                                                             {{$moment(data.day).format('D')}}
-                                                            <div class="item_dotted" 
-                                                                v-for="(item,index) in dayTime" :key="index" 
-                                                                v-if="$moment(data.day).format('YYYY-MM-DD') === $moment(item.value).format('YYYY-MM-DD')"></div>
+                                                            <div class="item_dotted" v-for="(item,index) in dayTime" :key="index" v-if="$moment(data.day).format('YYYY-MM-DD') === $moment(item.value).format('YYYY-MM-DD')"></div>
 
                                                         </div>
                                                     </template>
@@ -201,12 +193,7 @@
                                                     <div class="image_list">
                                                         <div class="image_item">
                                                             <div class="image_self">
-                                                                <el-image 
-                                                                    :z-index="3000" 
-                                                                    fit="contain" 
-                                                                    style="width: 100%; height: 100%" 
-                                                                    :preview-src-list="[$imgUrl + item.resourcePath]" 
-                                                                    :src="$imgUrl + item.resourcePath">
+                                                                <el-image :z-index="3000" fit="contain" style="width: 100%; height: 100%" :preview-src-list="[$imgUrl + item.resourcePath]" :src="$imgUrl + item.resourcePath">
                                                                 </el-image>
                                                             </div>
                                                             <div class="image_source">{{item.name}}</div>
@@ -245,7 +232,7 @@
 
                                     </div>
                                 </div>
-                            </el-dialog>     
+                            </el-dialog>
                         </div>
 
                         <!-- 查看群成员弹窗 -->
@@ -283,7 +270,7 @@
                                     </div>
                                 </div>
 
-                                <!-- v-if惰性加载 换为v-show -->
+                                <!-- v-if惰性加载 换为v-show  v-show 条件是否成立 都会渲染 相当于 css切换-->
                                 <div class="client_icon" slot="reference" @click="openGroupDialog" v-show="isGroup === 'GROUP'">
                                     <i class="element-icons el-iconqiweiqunchengyuan"></i>
                                 </div>
@@ -294,63 +281,40 @@
                     </div>
                 </div>
                 <!-- 聊天对话 -->
-                <div class="right_content">
-                    <SituationChat v-bind:recordList="recordList"></SituationChat>
+                <!-- 
+                    :class="scrollFixed === true ? 'isFixed':'right_content'"
+                 -->
+                <div 
+                    class="right_content"
+                    ref="rightContent" 
+                    @mousewheel="handleScroll"
+                >
+
+                    <div style="height: 50px; overflow:auto;"></div>
+                    <div ref="situationChat">
+                        <SituationChat v-bind:recordList="recordList"></SituationChat>
+                    </div>
+
+                    <div class="right_content_more_load" v-if="pageLoading">
+                        <i class="el-icon-loading"></i>
+                        <span>加载中...</span>
+                    </div>
+                    <div class="right_content_more_load" v-else>
+                        <span>加载完成</span>
+                    </div>
                 </div>
 
             </div>
         </div>
-
-        <!--
-            ------------员工------------ 
-            标记内容对话框-->
-        <el-dialog custom-class="tagDialog" top="30vh" title="添加标记内容" :visible.sync="showTag" width="400px">
-            <div class="tag_dialog">
-                <el-input type="textarea" :rows="6" placeholder="多行输入" v-model="tagContent" clearable></el-input>
-            </div>
-            <span slot="footer" class="dialog-footer" center>
-                <el-button @click="closeTagDialog">取 消</el-button>
-                <el-button type="primary" @click="closeTagDialog">保 存</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- <DialogDemo 
-            :dialogTitle="tagTitle"
-            :showDialog="showTag"
-            :dialogType="true"
-            @closeModal="closeTagDialog"
-        ></DialogDemo> -->
-        <!-- 
-            ------------员工------------
-            下载聊天记录对话框 -->
-        <el-dialog custom-class="loadDialog" top="35vh" title="下载聊天记录" :visible.sync="showLoad" width="400px">
-            <div class="load_dialog">
-                <el-date-picker v-model="starTime" type="date" placeholder="开始日期"></el-date-picker> -
-
-                <el-date-picker v-model="endTime" type="date" placeholder="结束日期"></el-date-picker>
-            </div>
-            <span slot="footer" class="dialog-footer" center>
-                <el-button @click="closeLoadDialog">取 消</el-button>
-                <el-button type="primary" @click="closeLoadDialog">下 载</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- <DialogDemo 
-            :dialogTitle="loadTitle"
-            :showDialog="showLoad"
-            @closeModal="closeLoadDialog"
-        >
-        </DialogDemo> -->
-
     </div>
 </template>
 
 <script>
+import SituationChat from "../components/situationChat"
 export default {
     components: {
-        SearchContent: () => import("../components/searchContent"),   // 搜索聊天内容
-        SituationChat: () => import("../components/situationChat"), // 聊天对话
-        // DialogDemo: () => import("../components/dialogDemo"),  // 对话框
+        SearchContent: () => import("../components/searchContent"),   // 搜索聊天内容  
+        SituationChat
     },
     data() {
         return {
@@ -382,12 +346,17 @@ export default {
 
             tagTitle: "添加标记内容",
             loadTitle: "下载聊天记录",
-            dialogType:"tag",
-
-            // 加载数据 群聊
-            dataLoading: true,
+            dialogType: "tag",
 
 
+            dataLoading: true, // 群聊个人信息介绍  数据加载
+            pageLoading: true, // 页面分页默认值
+            scrollFixed: false, // 滚动条距离
+            // scrollLoading: false, // 列表数据 防止重复请求
+
+            chatPageIndex: 1, // 获取聊天对话 当前默认页数 下划
+            chatPageSignIndex: 1, // 上拉 默认页数
+            chatPageSize: 10, // 获取聊天对话 页数
 
             // 私聊群聊列表标签
             chatTypeArr: [{
@@ -466,6 +435,7 @@ export default {
                             this.chatList.push(item)
                         }
                     })
+                    this.chatPageIndex = 1
                     this.chatDetail()
                 } else {
                     this.$message.error(res.data.message)
@@ -495,6 +465,7 @@ export default {
                     }
                 })
                 this.chatList = data
+                this.chatPageIndex = 1
                 this.chatDetail()
             } else {
                 this.getChatList()
@@ -502,8 +473,12 @@ export default {
 
         },
 
-        // 获取聊天对话  val 每一条数据  type(true false) true表示从日历进入相关天数到对应界面位置
-        chatDetail(val, type) {
+        // 获取聊天对话  
+        // val 每一条数据  
+        // type(true false) true表示从日历进入相关天数到对应界面位置
+        // u 聊天记录分页加载  上划(top) 下划(button)  
+        
+        chatDetail(val, type, u) {
 
             if (val) {
 
@@ -515,11 +490,9 @@ export default {
                 this.dialogItem = this.chatList[0]
             }
 
-            console.log('dialogItem', val)
-
             let data = {
-                pageSize: 50,
-                pageIndex: 1,
+                pageSize: this.chatPageSize,
+                pageIndex: u === 'top' ? this.chatPageSignIndex : this.chatPageIndex,
             }
 
             // 区分群聊 私聊
@@ -538,13 +511,34 @@ export default {
 
             let passengerList = []
 
+            // 聊天记录 上划 
+            if(u) {
+                data['sortType'] = u
+                    if(u === 'top'){
+                        data['id'] = this.recordList[0].id
+                    }
+            }
+
             this.$axios.post('/WxChat/GetUserParticularChat', data).then((res) => {
 
-                if (res.data.status === 0 && res.data.body.result.length > 0) {
+                if (res.data.status === 0) {
                     let newRecordList
                     newRecordList = res.data.body.result
-                    console.log('对话聊天', newRecordList)
+                    
+                    // 判断是否为滚动加载
+                    if(u) {  
+                        if(u === 'top'){
+                            // this.scrollLoading = false
+                            newRecordList = res.data.body.result.concat(this.recordList)
+                            this.pageLoading = true
+                        }else if(u === 'button'){
+                            // this.scrollLoading = false
+                            newRecordList = this.recordList.concat(res.data.body.result)
+                            this.pageLoading = true  
+                        }
+                    }
 
+                
                     newRecordList.forEach(item => {
                         passengerList.push(item.from || item.to)
                         item['name'] = item.from                                      // 聊天对话组件 名字
@@ -555,7 +549,7 @@ export default {
                             item['groupMessageForward'] = true
                         }
                         // 转发对话框组件  单个
-                        if(item.contentType === 'mixed' && item.receiver[0] === item.from) {
+                        if (item.contentType === 'mixed' && item.receiver[0] === item.from) {
                             item['singleForward'] = true
                         }
                     })
@@ -563,18 +557,74 @@ export default {
                     // 去重
                     this.thisPassnegerList = [...new Set(passengerList)]
 
-                    // 处理聊天对话组件 
+
+                    // 正常情况下获取聊天记录 处理聊天对话组件 
                     this.getUserMessageData('', newRecordList, 'from')
                         .then(text => {
                             this.recordList = text
-                        })
-
+                    }) 
+                    
                 } else {
                     this.$message.error(res.data.message)
                 }
             })
         },
+        
+        // 滚动事件
+        handleScroll() {
+            
+            let pDom = this.$refs.situationChat  // 聊天盒子
+            let thisDom = this.$refs.rightContent  // 聊天盒子 父级
+            let windowHeight = thisDom.offsetHeight  // 聊天盒子 父级 视口高度
+            let scroll = thisDom.scrollTop  // 距离顶部高度
+            let domHight = pDom.offsetHeight   // 盒子高度 父级
+            console.log('滚动条离开父级高度', scroll, '父级高度', windowHeight, '顶部和视口', domHight)
 
+            
+            let scrollNumber = scroll + windowHeight
+
+            // 判断加载方式 如果是下拉 refreshDownDetail('button')
+            if (scroll === 0 && this.pageLoading) {
+                console.log('到顶部')
+                this.pageLoading = false
+                // this.scrollLoading = true
+                this.chatPageSignIndex = this.chatPageSignIndex + 1
+                this.refreshDownDetail('top')
+                this.chatPageSignIndex = 1
+            }
+
+            if (scrollNumber >= (domHight- 50) && this.pageLoading) {
+                console.log('到底了')
+                
+                this.pageLoading = false
+                // this.scrollLoading = true
+                this.chatPageIndex = this.chatPageIndex + 1
+                this.refreshDownDetail('button')
+                this.chatPageIndex= 1
+            }
+
+            // 滚动条距离 距离小于50
+            if(scroll < 50) {
+                this.scrollFixed = true
+            }else {
+                this.scrollFixed = false
+            }
+        },
+
+        // 获取聊天对话  加载分页 
+        refreshDownDetail(e) {
+            console.log('上还是下',e)
+            this.chatDetail(this.dialogItem,'',e)
+           
+        },
+
+        // 获取聊天对话  单个
+        getChatDetail(e) {
+            this.chatPageIndex = 1
+            this.chatPageSignIndex = 1
+            this.chatDetail(e)
+            this.pageLoading = true
+        },
 
         // 打开群聊列表对应弹窗
         groupDetail(val) {
@@ -600,8 +650,8 @@ export default {
                     this.personList = res.data.body;
                     this.dataLoading = false
 
-                    if(val) {
-                        
+                    if (val) {
+
                         for (let i = 0; i < val.length; i++) {
                             for (let o = 0; o < res.data.body.length; o++) {
                                 // 聊天对话组件 名字 头像
@@ -647,6 +697,7 @@ export default {
             this.$axios.post('/WxChat/GetDateChatList', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.length > 0) {
                     this.dayTime = res.data.body
+                    console.log('聊天日期',this.dayTime)
                 } else (
                     this.$message.error(res.data.message)
                 )
@@ -655,7 +706,7 @@ export default {
 
         // 搜索聊天记录对话框  对应时间点位置
         async jumpDate(e) {
-            if(this.$moment(e.day).isAfter(new Date())){
+            if (this.$moment(e.day).isAfter(new Date())) {
                 return false
             }
             console.log('日期', e)
@@ -664,6 +715,8 @@ export default {
             }
             let data = JSON.parse(JSON.stringify(this.dialogItem))
             data.endTime = e.day + ' 00:00:00'
+            this.chatPageIndex = 1
+            this.pageLoading = true
             await this.chatDetail(data, true)
         },
 
@@ -675,6 +728,8 @@ export default {
                 endTime: JSON.parse(JSON.stringify(this.$moment(Number(val.sendDate)).format('YYYY-MM-DD')))
             }
             console.log('内容时间', data)
+            this.chatPageIndex = 1
+            this.pageLoading = true
             await this.chatDetail(data, true)
         },
 
@@ -710,7 +765,7 @@ export default {
 
         // 标记下载提示
         openPrompt() {
-            this.$message('功能待开发，请敬请期待');         
+            this.$message('功能待开发，请敬请期待');
         },
         // 打开标记内容
         openTagDialog() {
@@ -814,8 +869,15 @@ export default {
         }
     },
     mounted() {
+        this.$refs.rightContent.addEventListener('scroll', this.handleScroll, true)
 
-    }
+        // this.$refs.rightContent.scrollTop = 50
+
+    },
+    // destroyed() {
+    //     this.$refs.rightContent.removeEventListener('scroll', this.handleScroll,true)
+    //     console.log('移除')
+    // }
 }
 </script>
 
@@ -876,7 +938,6 @@ export default {
                             text-overflow: ellipsis;
                             overflow: hidden;
                             max-width: 200px;
-
                         }
                         .explain_dep {
                             font-size: 10px;
@@ -914,9 +975,8 @@ export default {
                         padding: 24px 0px 0px 10px;
                     }
                     .left_conver_list {
+                        height: calc(100vh - 351px);
                         overflow-y: auto;
-                        height: 80vh;
-
                         .list_item {
                             display: flex;
                             width: 100%;
@@ -1037,6 +1097,7 @@ export default {
                     .staff_list_item_total {
                         height: 80vh;
                         overflow-y: auto;
+                        height: calc(100vh - 271px);
                         .staff_list_item {
                             padding: 15px 15px 0px;
                             border-bottom: 2px solid #e4e7ed;
@@ -1169,8 +1230,23 @@ export default {
             .right_content {
                 width: auto;
                 overflow-y: auto;
-                height: calc(100vh - 167px);
+                height: calc(100vh - 188px);
+                // position: static;   // relative
+                // top: 50px;
+                .right_content_more_load {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    span {
+                        font-size: 10px;
+                    }
+                }
+
             }
+            // .isFixed {
+            //     position: fixed;
+            //     top:0;
+            // }
         }
     }
 
@@ -1334,7 +1410,7 @@ export default {
                     height: 50px;
                     text-align: center;
                     line-height: 50px;
-                    &:not(.is_active){
+                    &:not(.is_active) {
                         color: rgb(192, 196, 204);
                         cursor: not-allowed;
                         background-image: none;
@@ -1446,13 +1522,12 @@ export default {
 
 // 群聊个人信息弹窗
 .person_dialog_popper {
-    
     .person_dialog {
         width: 300px;
         .person_popover_title {
             display: flex;
             align-items: center;
-            margin-bottom:10px;
+            margin-bottom: 10px;
             .title_img {
                 width: 45px;
                 height: 45px;
