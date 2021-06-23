@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: mzr
  * @Date: 2021-04-16 10:22:50
- * @LastEditTime: 2021-05-24 14:45:27
+ * @LastEditTime: 2021-06-18 17:43:20
  * @LastEditors: mzr
 -->
 <template>
@@ -28,7 +28,7 @@ export default {
   name: "weChatMonitor",
   components: {
     HeaderTemplate: () => import("./components/Header.vue"), // 导航栏
-    AsideTemplate: () => import("./components/Aside.vue"),
+    AsideTemplate: () => import("./components/Aside.vue"), // 侧边栏
   },
 };
 </script>

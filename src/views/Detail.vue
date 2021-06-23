@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-06-16 11:14:30
+ * @LastEditTime: 2021-06-18 10:24:48
  * @LastEditors: mzr
 -->
 <template>
@@ -149,12 +149,12 @@
                     <div class="right_action_item">
                         <div class="action_icon"></div>
                         <div class="action_title">联系人已同意聊天记录存档</div>
-                        <div class="action_message" v-if="listType === '员工'" @click="openPrompt">
+                        <div class="action_message" v-if="listType === '员工'" @click="openTagDialog">
                             <i class="element-icons el-iconbiaoji"></i>
                         </div>
                     </div>
                     <div class="right_action_item">
-                        <div class="action_load" @click="openPrompt">
+                        <div class="action_load" @click="openLoadDialog">
                             <i class="el-icon-download"></i>
                             <span>下载</span>
                         </div>
@@ -306,6 +306,20 @@
 
             </div>
         </div>
+
+        <!-- 标记对话框 -->
+        <DialogDemo 
+            :dialogTitle="tagTitle"
+            :showDialog="showTag"
+            :dialogType="true"
+            @closeModal="closeTagDialog"
+        ></DialogDemo>
+        <!-- 下载对话框 -->
+        <DialogDemo 
+            :dialogTitle="loadTitle"
+            :showDialog="showLoad"
+            @closeModal="closeLoadDialog"
+        ></DialogDemo>
     </div>
 </template>
 
@@ -313,8 +327,10 @@
 import SituationChat from "../components/situationChat"
 export default {
     components: {
+
         SearchContent: () => import("../components/searchContent"),   // 搜索聊天内容  
-        SituationChat
+        SituationChat,
+        DialogDemo: () => import("../components/dialogDemo.vue")  // 对话框  （下载/标记）
     },
     data() {
         return {
@@ -346,13 +362,10 @@ export default {
 
             tagTitle: "添加标记内容",
             loadTitle: "下载聊天记录",
-            dialogType: "tag",
-
 
             dataLoading: true, // 群聊个人信息介绍  数据加载
             pageLoading: true, // 页面分页默认值
             scrollFixed: false, // 滚动条距离
-            // scrollLoading: false, // 列表数据 防止重复请求
 
             chatPageIndex: 1, // 获取聊天对话 当前默认页数 下划
             chatPageSignIndex: 1, // 上拉 默认页数
@@ -401,9 +414,7 @@ export default {
             //     },
             // ],
 
-            // 下载 弹窗
-            starTime: "", //  开始时间
-            endTime: "", // 结束时间 
+           
 
             // 群成员 弹窗
             groupTypeBtn: "员工", // 默认值 员工
@@ -428,7 +439,7 @@ export default {
                 userid: this.userMessage.userid,
                 chatType: this.activeName === 'ALL' ? "" : this.activeName
             }
-            this.$axios.post('/WxChat/GetUserChatList', data).then((res) => {
+            this.$axios.post('/GetUserChatList', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.length > 0) {
                     res.data.body.forEach(item => {
                         if (item) {
@@ -519,7 +530,7 @@ export default {
                     }
             }
 
-            this.$axios.post('/WxChat/GetUserParticularChat', data).then((res) => {
+            this.$axios.post('/GetUserParticularChat', data).then((res) => {
 
                 if (res.data.status === 0) {
                     let newRecordList
@@ -528,11 +539,9 @@ export default {
                     // 判断是否为滚动加载
                     if(u) {  
                         if(u === 'top'){
-                            // this.scrollLoading = false
                             newRecordList = res.data.body.result.concat(this.recordList)
                             this.pageLoading = true
                         }else if(u === 'button'){
-                            // this.scrollLoading = false
                             newRecordList = this.recordList.concat(res.data.body.result)
                             this.pageLoading = true  
                         }
@@ -587,8 +596,7 @@ export default {
             if (scroll === 0 && this.pageLoading) {
                 console.log('到顶部')
                 this.pageLoading = false
-                // this.scrollLoading = true
-                this.chatPageSignIndex = this.chatPageSignIndex + 1
+                // this.chatPageSignIndex = this.chatPageSignIndex + 1
                 this.refreshDownDetail('top')
                 this.chatPageSignIndex = 1
             }
@@ -597,7 +605,6 @@ export default {
                 console.log('到底了')
                 
                 this.pageLoading = false
-                // this.scrollLoading = true
                 this.chatPageIndex = this.chatPageIndex + 1
                 this.refreshDownDetail('button')
                 this.chatPageIndex= 1
@@ -609,6 +616,7 @@ export default {
             }else {
                 this.scrollFixed = false
             }
+
         },
 
         // 获取聊天对话  加载分页 
@@ -636,13 +644,16 @@ export default {
             // this.chatDetail(val)
         },
 
-        // 获取用户信息   e 群聊个人信息  type 装userid 判断参数是否和userid相等  val 
+        // 获取用户信息
+        // e 群聊个人信息 
+        // type 装userid 判断参数是否和userid相等  
+        // val 
         getUserMessageData(e, val, type) {
 
             let data = {
                 userid: e ? e.userid : String(this.thisPassnegerList)
             }
-            return this.$axios.post('/WxChat/GetAllUserList', data).then((res) => {
+            return this.$axios.post('/GetAllUserList', data).then((res) => {
 
                 if (res.data.status === 0 && res.data.body.length > 0) {
 
@@ -694,7 +705,7 @@ export default {
                 sessionid: this.dialogItem.sessionid,
                 datetime: this.dialogItem.endTime
             }
-            this.$axios.post('/WxChat/GetDateChatList', data).then((res) => {
+            this.$axios.post('/GetDateChatList', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.length > 0) {
                     this.dayTime = res.data.body
                     console.log('聊天日期',this.dayTime)
@@ -715,8 +726,11 @@ export default {
             }
             let data = JSON.parse(JSON.stringify(this.dialogItem))
             data.endTime = e.day + ' 00:00:00'
+
+            // 聊天分页
             this.chatPageIndex = 1
             this.pageLoading = true
+
             await this.chatDetail(data, true)
         },
 
@@ -728,8 +742,11 @@ export default {
                 endTime: JSON.parse(JSON.stringify(this.$moment(Number(val.sendDate)).format('YYYY-MM-DD')))
             }
             console.log('内容时间', data)
+
+            // 聊天分页
             this.chatPageIndex = 1
             this.pageLoading = true
+
             await this.chatDetail(data, true)
         },
 
@@ -742,7 +759,7 @@ export default {
                 searchType: type ? 'text' : this.activeRecordName,
                 search: this.recordSearch
             }
-            this.$axios.post('/WxChat/GetUserSearchChatList', data).then((res) => {
+            this.$axios.post('/GetUserSearchChatList', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.result.length > 0) {
                     // 图片/链接  处理工号 姓名
                     this.getUserMessageData('', res.data.body.result, 'sendChatUserid').then(text => this.sumList = text)
@@ -787,7 +804,6 @@ export default {
 
         // 打开群成员内容
         openGroupDialog() {
-            console.log('打开群聊')
             this.getGroupList();
         },
 
@@ -829,7 +845,7 @@ export default {
             let data = {
                 userid: this.groupId ? this.groupId : this.userMessage.userid
             }
-            this.$axios.post('/WxChat/GetGroupChatUser', data).then((res) => {
+            this.$axios.post('/GetGroupChatUser', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.length > 0) {
 
                     // 群成员列表
@@ -869,9 +885,8 @@ export default {
         }
     },
     mounted() {
+        
         this.$refs.rightContent.addEventListener('scroll', this.handleScroll, true)
-
-        // this.$refs.rightContent.scrollTop = 50
 
     },
     // destroyed() {

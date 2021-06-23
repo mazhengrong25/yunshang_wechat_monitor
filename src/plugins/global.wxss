@@ -33,16 +33,6 @@ img {
 .el-container .el-main {
   padding: 0;
 }
-.el-dialog__footer {
-  text-align: center;
-}
-.el-dialog__footer .dialog-footer .el-button {
-  border-radius: 20px;
-  padding: 12px 60px;
-}
-.el-dialog__footer .dialog-footer .el-button--default {
-  background-color: lightgray;
-}
 .el-table thead {
   color: #333;
 }

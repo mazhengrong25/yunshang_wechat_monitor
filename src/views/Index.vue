@@ -2,7 +2,7 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-06-16 09:58:18
+ * @LastEditTime: 2021-06-18 10:25:24
  * @LastEditors: mzr
 -->
 
@@ -347,7 +347,7 @@ export default {
 
         // 获取部门  
         getDepartList() {
-            this.$axios.post('/WxChat/GetDepartment').then((res) => {
+            this.$axios.post('/GetDepartment').then((res) => {
                 this.optionList = res.data.body;
             })
         },
@@ -362,7 +362,7 @@ export default {
                 search: this.searchData.jobNumber,
                 personneltype: this.checkList
             }
-            this.$axios.post('/WxChat/GetAllUserChatList', data).then((res) => {
+            this.$axios.post('/GetAllUserChatList', data).then((res) => {
                 if (res.data.status === 0 && res.data.body.result.length > 0) {
                     this.tableLoading = false;
                     this.tableData = res.data.body.result

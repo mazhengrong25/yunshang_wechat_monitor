@@ -2,14 +2,13 @@
  * @Description: 对话框  ---  标记 下载聊天对话
  * @Author: mzr
  * @Date: 2021-06-02 16:47:40
- * @LastEditTime: 2021-06-03 15:48:04
+ * @LastEditTime: 2021-06-17 15:35:10
  * @LastEditors: mzr
 -->
 <template>
   <div>
     <el-dialog 
       custom-class="dialogDemo"
-      destroy-on-close
       top="30vh" 
       width="400px"
       :title= dialogTitle
@@ -21,20 +20,18 @@
             <div class="tag_dialog">
                 <el-input type="textarea" :rows="6" placeholder="多行输入" v-model="tagContent" clearable></el-input>
             </div>
-            <span slot="footer" class="dialog-footer" center>
-                <el-button @click="closeTagDialog">取 消</el-button>
-                <el-button type="primary" @click="closeTagDialog">保 存</el-button>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="closeDialog">取 消</el-button>
+                <el-button type="primary" @click="closeDialog">保 存</el-button>
             </span>
           </div>
           <div v-else>
             <div class="load_dialog">
-              <el-date-picker v-model="starTime" type="date" placeholder="开始日期"></el-date-picker> -
-
-              <el-date-picker v-model="endTime" type="date" placeholder="结束日期"></el-date-picker>
+              <el-date-picker v-model="starTime" type="date" placeholder="开始日期"></el-date-picker> - <el-date-picker v-model="endTime" type="date" placeholder="结束日期"></el-date-picker>
             </div>
-            <span slot="footer" class="dialog-footer" center>
-              <el-button @click="closeLoadDialog">取 消</el-button>
-              <el-button type="primary" @click="closeLoadDialog">下 载</el-button>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="closeDialog">取 消</el-button>
+              <el-button type="primary" @click="closeDialog">下 载</el-button>
             </span>
           </div>
         
@@ -67,21 +64,14 @@ export default {
   },
   data() {
     return {
-        
+      
+        starTime: "", //  开始时间
+        endTime: "", // 结束时间 
+
+        tagContent:"", // 标记内容
     }
   },
   methods: {
-    // 打开标记
-    // openTagDialog() {
-    //   this.$refs.openTagDialog();
-    // },
-    
-
-    // 关闭对话框
-    // closeDialog() {
-    //   this.showDialog = false
-    // },
-
       // 子组件关闭   关闭前的回调
       closeDialog(){
           this.$emit('closeModal')
@@ -93,6 +83,33 @@ export default {
 
 <style lang="less" scoped>
 .dialogDemo {
+  .load_dialog {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .el-date-editor.el-input,
+        .el-date-editor.el-input__inner {
+            width: 160px;
+        }
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    .el-button {
+      border-radius: 20px;
+      padding: 12px 60px;
+    }
+    .el-button--default {
+      background-color: lightgray;
+    }
+  }
+  
+  .el-dialog__body {
+    text-align: center;
+  }
+
 
 }
 </style>

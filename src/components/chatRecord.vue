@@ -2,7 +2,7 @@
  * @Description: 聊天存档列表 ---- 聊天记录
  * @Author: mzr
  * @Date: 2021-04-28 14:27:48
- * @LastEditTime: 2021-06-04 15:36:23
+ * @LastEditTime: 2021-06-18 10:33:29
  * @LastEditors: mzr
 -->
 <template>
@@ -157,7 +157,7 @@ export default {
                 isStaff:this.checkAction?'员工':'',
                 search:this.inputSearch
             }
-            this.$axios.post('/WxChat/GetChatSearchList',data).then((res) => {
+            this.$axios.post('/GetChatSearchList',data).then((res) => {
                 
                 if(res.data.status === 0 && res.data.body.result.length > 0) {
                     
@@ -188,7 +188,7 @@ export default {
 
             let passengerList = []
 
-            this.$axios.post('/WxChat/GetUserParticularChat',data).then((res) => {
+            this.$axios.post('/GetUserParticularChat',data).then((res) => {
                 if(res.data.status === 0 && res.data.body.result.length > 0) {
 
                     let newRecordList = []
@@ -231,7 +231,7 @@ export default {
             let data = {
                 userid: e ? e.userid : String(this.thisPassnegerList)
             }
-            return this.$axios.post('/WxChat/GetAllUserList', data).then((res) => {
+            return this.$axios.post('/GetAllUserList', data).then((res) => {
 
                 if (res.data.status === 0 && res.data.body.length > 0) {
                     

@@ -2,7 +2,7 @@
  * @Description: 侧边栏
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 16:44:46
- * @LastEditTime: 2021-05-27 11:17:46
+ * @LastEditTime: 2021-06-16 17:58:38
  * @LastEditors: mzr
 -->
 <template>
@@ -17,7 +17,7 @@
         <el-menu-item index="/index">
           <template slot="title">
             <div class="title_item">
-              <div class="archive_img" />
+              <div class="archive_img"></div>
               <span>聊天存档</span>
             </div>
           </template>
