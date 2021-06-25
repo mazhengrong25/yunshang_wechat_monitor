@@ -6,8 +6,8 @@
  * @LastEditors: mzr
 -->
 <template>
-  <div id="weChatMonitor">
-    <el-container>
+    <div id="weChatMonitor">
+        <!-- <el-container>
       <el-header>
         <HeaderTemplate></HeaderTemplate>
       </el-header>
@@ -19,24 +19,27 @@
           <router-view />
         </el-main>
       </el-container>
-    </el-container>
-  </div>
+    </el-container> -->
+        <ConfigTemplate></ConfigTemplate>
+    </div>
 </template>
 
 <script>
 export default {
-  name: "weChatMonitor",
-  components: {
-    HeaderTemplate: () => import("./components/Header.vue"), // 导航栏
-    AsideTemplate: () => import("./components/Aside.vue"), // 侧边栏
-  },
+    name: "weChatMonitor",
+    components: {
+        // HeaderTemplate: () => import("./components/Header.vue"), // 导航栏
+        // AsideTemplate: () => import("./components/Aside.vue"), // 侧边栏
+
+        ConfigTemplate: () => import("./components/ConfigPage.vue"),
+    },
 };
 </script>
 
 <style lang="less" scoped>
 .el-container {
     .el-main {
-      overflow: hidden;
+        overflow: hidden;
     }
 }
 </style>

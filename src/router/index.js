@@ -11,20 +11,25 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 const routes = [
+  // {
+  //   path: '/',
+  //   name: 'Index',
+  //   component: () => import('../views/Index.vue')
+  // },
+  // {
+  //   path: '/index',
+  //   name: 'Index',
+  //   component: () => import('../views/Index.vue')
+  // },
+  // {
+  //   path: '/detail',
+  //   name: 'Detail',
+  //   component: () => import('../views/Detail.vue')
+  // },
   {
     path: '/',
-    name: 'Index',
-    component: () => import('../views/Index.vue')
-  },
-  {
-    path: '/index',
-    name: 'Index',
-    component: () => import('../views/Index.vue')
-  },
-  {
-    path: '/detail',
-    name: 'Detail',
-    component: () => import('../views/Detail.vue')
+    name: 'Config',
+    component: () => import('../components/Config.vue')
   },
 ]
 
