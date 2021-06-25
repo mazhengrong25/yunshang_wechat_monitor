@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: mzr
  * @Date: 2021-06-18 15:56:02
- * @LastEditTime: 2021-06-18 17:19:00
+ * @LastEditTime: 2021-06-25 17:14:50
  * @LastEditors: mzr
  */
 
@@ -14,3 +14,10 @@
 // if(process.env.NODE_ENV == "production") {
 //   axios.defaults.baseURL = "https://"
 // }
+
+import axios from "axios"
+
+
+
+
+export default axios

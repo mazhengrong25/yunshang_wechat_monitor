@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:33:05
- * @LastEditTime: 2021-06-25 10:41:06
+ * @LastEditTime: 2021-06-25 16:26:09
  * @LastEditors: mzr
  */
 import Vue from 'vue'
@@ -11,31 +11,32 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 const routes = [
-  // {
-  //   path: '/',
-  //   name: 'Index',
-  //   component: () => import('../views/Index.vue')
-  // },
-  // {
-  //   path: '/index',
-  //   name: 'Index',
-  //   component: () => import('../views/Index.vue')
-  // },
-  // {
-  //   path: '/detail',
-  //   name: 'Detail',
-  //   component: () => import('../views/Detail.vue')
-  // },
   {
     path: '/',
-    name: 'Config',
-    component: () => import('../components/Config.vue')
+    name: 'Index',
+    component: () => import('../views/Index.vue')
+  },
+  {
+    path: '/index',
+    name: 'Index',
+    component: () => import('../views/Index.vue')
+  },
+  {
+    path: '/detail',
+    name: 'Detail',
+    component: () => import('../views/Detail.vue')
   },
   {
     path: '/login',
     name: 'Login',
     component: () => import('../views/Login.vue')
+  },
+  {
+    path: '/config',
+    name: 'Config',
+    component: () => import('../components/ConfigPage.vue')
   }
+
 
 ]
 

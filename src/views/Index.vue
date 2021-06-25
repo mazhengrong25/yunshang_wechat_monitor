@@ -2,7 +2,7 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-06-18 10:25:24
+ * @LastEditTime: 2021-06-25 17:16:08
  * @LastEditors: mzr
 -->
 
@@ -57,7 +57,7 @@
             <div class="item_table">
                 <!-- 员工 -->
                 <el-table v-loading="tableLoading" :data="tableData" v-if="checkList === '员工'">
-                    <el-table-column  label="员工微信">
+                    <el-table-column label="员工微信">
                         <template slot-scope="scope">
                             <div class="table_wechat">
                                 <div class="table_img">
@@ -71,7 +71,7 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column  label="工号/姓名">
+                    <el-table-column label="工号/姓名">
                         <template slot-scope="scope">
                             <div class="table_staff">
                                 <div class="staff_no">{{byteLength(scope.row.userid)}}</div>
@@ -118,13 +118,13 @@
                                 </div>
                                 <!-- style="text-align : center" -->
                                 <div class="table_item" style="display:flex; align-items:center;">
-                                     <div class="person_name">{{scope.row.name}}</div>
+                                    <div class="person_name">{{scope.row.name}}</div>
                                     <!-- <div class="wechat_no">{{byteLength(scope.row.userid)}}</div> -->
                                 </div>
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column  label="所属客服">
+                    <el-table-column label="所属客服">
                         <template slot-scope="scope">
                             <div class="table_staff">
                                 <!-- <div class="staff_no">{{byteLength(scope.row.userid)}}</div> -->
@@ -139,7 +139,7 @@
                             {{scope.row.groupchat}}
                         </template>
                     </el-table-column>
-                    <el-table-column prop="gender" label="性别" >
+                    <el-table-column prop="gender" label="性别">
                         <template slot-scope="scope">
                             {{scope.row.gender === '1' ?'男':
                                 scope.row.gender === '2'?'女':'未定义'
@@ -164,7 +164,7 @@
                             <div class="table_wechat">
                                 <div class="table_img not_background">
                                     <img v-if="scope.row.avatar" :src="scope.row.avatar" />
-                                    <img v-else :src="require('@/static/group_avatar.png')" alt="本地图片" /> 
+                                    <img v-else :src="require('@/static/group_avatar.png')" alt="本地图片" />
                                 </div>
                                 <div class="table_item">
                                     <el-tooltip class="item" effect="dark" :content="scope.row.name" placement="bottom-start">
@@ -202,12 +202,7 @@
                     </el-table-column>
                 </el-table>
                 <!-- 分页 -->
-                <el-pagination 
-                    background layout="prev, pager, next"
-                    :total="tablePage.pageTotal"
-                    :page-size.sync="tablePage.pageSize" 
-                    :current-page.sync="tablePage.pageCurrent" 
-                    @current-change="changePageIndex"></el-pagination>
+                <el-pagination background layout="prev, pager, next" :total="tablePage.pageTotal" :page-size.sync="tablePage.pageSize" :current-page.sync="tablePage.pageCurrent" @current-change="changePageIndex"></el-pagination>
             </div>
         </div>
         <!-- 聊天记录 -->
@@ -225,7 +220,7 @@ export default {
     },
     data() {
         return {
-            
+
             inputSearch: "", // 搜索值
 
             // 搜索筛选条件
@@ -268,46 +263,48 @@ export default {
             // //////////////////////////////////////
             groupList: "", // 分组列表
             options_group: [
-            {
-                value: '0',
-                label: '默认'
-            },
-            {
-                value: '1',
-                label: '分组1'
-            }, {
-                value: '2',
-                label: '分组2'
-            }, {
-                value: '3',
-                label: '分组3'
-            }, {
-                value: '4',
-                label: '分组4'
-            }],
+                {
+                    value: '0',
+                    label: '默认'
+                },
+                {
+                    value: '1',
+                    label: '分组1'
+                }, {
+                    value: '2',
+                    label: '分组2'
+                }, {
+                    value: '3',
+                    label: '分组3'
+                }, {
+                    value: '4',
+                    label: '分组4'
+                }],
 
             tagList: "", // 标签列表  
             options_tag: [
-            {
-                value: '0',
-                label: '默认'
-            },
-            {
-                value: '1',
-                label: '分组1'
-            }, {
-                value: '2',
-                label: '标签2'
-            }],
+                {
+                    value: '0',
+                    label: '默认'
+                },
+                {
+                    value: '1',
+                    label: '分组1'
+                }, {
+                    value: '2',
+                    label: '标签2'
+                }],
 
             clientMess: "", // 客户信息
+
+            message: {}
 
         }
     },
     methods: {
 
         // 相关列表返回列表页
-        closeSearch(){
+        closeSearch() {
             this.inputSearch = ""
         },
 
@@ -398,8 +395,17 @@ export default {
     },
 
     created() {
+        if (!localStorage.getItem('Id') && !localStorage.getItem('departmentList')) {
+            return this.$router.push('/login');
+        }
         this.getDepartList() // 获取部门列表
         this.getDataList() // 获取表格列表
+
+        this.message = this.$route.query
+        // console.log('传',this.message)
+       
+        
+        console.log(localStorage.getItem('Id'), localStorage.getItem('departmentList'))
     }
 }
 </script>
@@ -443,11 +449,11 @@ export default {
                     border-color: #0070e2;
                     background: #0070e2;
                 }
-                /deep/ .el-radio__input.is-checked+.el-radio__label {
+                /deep/ .el-radio__input.is-checked + .el-radio__label {
                     color: #0070e2;
                 }
                 /deep/ .el-radio__input.is-checked .el-radio__inner :hover {
-                   border-color: #0070e2 !important;
+                    border-color: #0070e2 !important;
                 }
             }
             .action_item {
@@ -457,7 +463,6 @@ export default {
                 .el-input {
                     margin: 0px 20px;
                 }
-            
             }
         }
         .item_table {

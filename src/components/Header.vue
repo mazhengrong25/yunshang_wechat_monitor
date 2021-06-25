@@ -2,7 +2,7 @@
  * @Description: 导航栏
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 15:12:11
- * @LastEditTime: 2021-06-25 11:18:23
+ * @LastEditTime: 2021-06-25 17:16:27
  * @LastEditors: mzr
 -->
 <template>
@@ -31,6 +31,8 @@ export default {
     // 跳转登录页面
     jumpLogin() {
       console.log('登录')
+       localStorage.removeItem('Id')
+       localStorage.removeItem('departmentList')
       this.$router.push({
           name: 'Login',
           path: "./login",
