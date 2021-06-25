@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:33:05
- * @LastEditTime: 2021-05-31 11:33:33
+ * @LastEditTime: 2021-06-25 10:41:06
  * @LastEditors: mzr
  */
 import Vue from 'vue'
@@ -26,6 +26,12 @@ const routes = [
     name: 'Detail',
     component: () => import('../views/Detail.vue')
   },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/Login.vue')
+  }
+
 ]
 
 const router = new VueRouter({
