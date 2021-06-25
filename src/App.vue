@@ -2,17 +2,17 @@
  * @Description: 
  * @Author: mzr
  * @Date: 2021-04-16 10:22:50
- * @LastEditTime: 2021-06-18 17:43:20
+ * @LastEditTime: 2021-06-25 10:57:11
  * @LastEditors: mzr
 -->
 <template>
-    <div id="weChatMonitor">
-        <!-- <el-container>
-      <el-header>
+  <div id="weChatMonitor">
+    <el-container>
+      <el-header v-if="this.$router.history.current.name !== 'Login'">
         <HeaderTemplate></HeaderTemplate>
       </el-header>
       <el-container>
-        <el-aside width="200px">
+        <el-aside width="200px" v-if="this.$router.history.current.name !== 'Login'">
           <AsideTemplate></AsideTemplate>
         </el-aside>
         <el-main>
@@ -26,13 +26,15 @@
 
 <script>
 export default {
-    name: "weChatMonitor",
-    components: {
-        // HeaderTemplate: () => import("./components/Header.vue"), // 导航栏
-        // AsideTemplate: () => import("./components/Aside.vue"), // 侧边栏
+  name: "weChatMonitor",
+  components: {
+    HeaderTemplate: () => import("./components/Header.vue"), // 导航栏
+    AsideTemplate: () => import("./components/Aside.vue"), // 侧边栏
+  },
 
-        ConfigTemplate: () => import("./components/ConfigPage.vue"),
-    },
+  mounted(){
+    console.log(this.$router.history.current.name)
+  }
 };
 </script>
 
