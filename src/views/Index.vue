@@ -2,7 +2,7 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-06-25 17:16:08
+ * @LastEditTime: 2021-06-28 16:26:52
  * @LastEditors: mzr
 -->
 
@@ -297,8 +297,6 @@ export default {
 
             clientMess: "", // 客户信息
 
-            message: {}
-
         }
     },
     methods: {
@@ -400,10 +398,6 @@ export default {
         }
         this.getDepartList() // 获取部门列表
         this.getDataList() // 获取表格列表
-
-        this.message = this.$route.query
-        // console.log('传',this.message)
-       
         
         console.log(localStorage.getItem('Id'), localStorage.getItem('departmentList'))
     }

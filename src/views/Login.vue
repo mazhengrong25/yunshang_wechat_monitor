@@ -2,7 +2,7 @@
  * @Description: 登录页
  * @Author: mzr
  * @Date: 2021-06-25 09:42:43
- * @LastEditTime: 2021-06-25 17:17:49
+ * @LastEditTime: 2021-06-28 17:01:13
  * @LastEditors: mzr
 -->
 <template>
@@ -18,9 +18,14 @@
                     <div class="right_mark">请使用OA账号登陆</div>
                 </div>
                 <div class="right_input">
-                    <div class="input_"></div>
-                    <el-input v-model="accountNumber" placeholder="账号"></el-input>
-                    <el-input v-model="passWord" placeholder="密码"></el-input>
+                    <div class="input_item">
+                      <div class="input_bar"></div>
+                      <el-input v-model="accountNumber" placeholder="账号" clearable></el-input>
+                    </div>
+                    <div class="input_item">
+                      <div class="input_bar"></div>
+                      <el-input v-model="passWord" placeholder="密码" show-password></el-input>
+                    </div>
                 </div>
                 <div class="right_check">
                     <el-checkbox v-model="checked">记住我</el-checkbox>
@@ -90,7 +95,7 @@ export default {
     .login_header {
         width: 158px;
         margin: 0 auto;
-        padding: 62px 36px;
+        padding: 62px 0px 36px;
         .login_icon {
             width: 158px;
             height: 62px;
@@ -105,6 +110,7 @@ export default {
         width: 1000px;
         margin: 0 auto;
         display: flex;
+        box-shadow: 0px 0px 50px #CED5E9;
         .content_left {
             width: 500px;
             height: 580px;
@@ -141,18 +147,55 @@ export default {
             .right_input {
                 width: 320px;
                 margin: 0 auto;
-                /deep/ .el-input {
-                    margin-bottom: 26px;
-                    .el-input__inner {
-                        height: 38px;
-                        background-color: #f7f7f7;
-                        border: 1px solid #f7f7f7;
-                    }
+                .input_item {
+                  display: inline-flex;
+                  .input_bar {
+                    width: 6px;
+                    height: 38px;
+                    background: #0070E2;
+                  }
+                  /deep/ .el-input {
+                      width: 314px;
+                      margin-bottom: 26px;
+                      .el-input__inner {
+                          height: 38px;
+                          background-color: #f7f7f7;
+                          border: 1px solid #f7f7f7;
+                      }
+                  }
                 }
             }
             .right_check {
                 width: 50px;
-                margin: 0 auto;
+                margin: 0 92px auto;
+                margin-bottom: 40px;
+                /deep/ .el-checkbox__inner {
+                    width: 18px;
+                    height: 18px;
+                    border: 1px solid #D9E1EA;
+                    border-radius: 2px;
+                    &::after {
+                        border: 2px solid #0070E2;
+                        height: 9px;
+                        left: 6px;
+                        border-left: 0;
+                        border-top: 0;
+                    }
+                }
+                
+                /deep/ .el-checkbox__input.is-checked .el-checkbox__inner,
+                 .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+                    background-color: unset;
+                    border-color: #D9E1EA;
+                }
+
+                /deep/ .el-checkbox__input.is-checked+.el-checkbox__label {
+                    color: #D9E1EA;
+                }
+                /deep/ .el-checkbox {
+                    color: #D9E1EA;
+                }
+                
             }
             .right_button {
                 width: 320px;
