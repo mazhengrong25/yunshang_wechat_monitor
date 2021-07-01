@@ -32,7 +32,7 @@
                 <!-- 搜索条件 -->
                 <div class="action_item">
                     <el-select style="width:200px" v-model="searchData.departList" placeholder="部门" clearable v-if="checkList === '员工'">
-                        <el-option v-for="item in optionList" :key="item" :label="item" :value="item"></el-option>
+                        <el-option v-for="item in optionList" :key="item.value" :label="item.label" :value="item.value"></el-option>
                     </el-select>
 
                     <el-input style="width:200px" v-model="searchData.jobNumber" placeholder="工号" clearable v-if="checkList === '员工'"></el-input>
@@ -128,7 +128,7 @@
                         <template slot-scope="scope">
                             <div class="table_staff">
                                 <!-- <div class="staff_no">{{byteLength(scope.row.userid)}}</div> -->
-                                <div class="staff_name">{{scope.row.name}}</div>
+                                <div class="staff_name">{{scope.row.interiorUserName}}({{scope.row.interiorUserId}})</div>
                             </div>
                         </template>
                     </el-table-column>
@@ -178,8 +178,8 @@
                     <el-table-column label="管理员" min-width="30%">
                         <template slot-scope="scope">
                             <div class="table_staff">
-                                <!-- <div class="staff_no">{{byteLength(scope.row.userid)}}</div> -->
-                                <div class="staff_name">{{scope.row.gruopOwner}}</div>
+                                <!-- <div class="staff_no">{{byteLength(scope.row.gruopOwnerName)}}</div> -->
+                                <div class="staff_name">{{scope.row.gruopOwnerName}}({{scope.row.gruopOwner}})</div>
                             </div>
                         </template>
                     </el-table-column>
@@ -207,7 +207,7 @@
         </div>
         <!-- 聊天记录 -->
         <div v-else>
-            <ChatRecord :inputSearch="inputSearch"></ChatRecord>
+            <ChatRecord :inputSearch="inputSearch" :department="departmentId"></ChatRecord>
         </div>
     </div>
 </template>
@@ -222,6 +222,7 @@ export default {
         return {
 
             inputSearch: "", // 搜索值
+            departmentId: "",//部门id
 
             // 搜索筛选条件
             searchData: {
@@ -330,8 +331,23 @@ export default {
         // 单选框绑定值变化
         changeCheck(e) {
             this.checkList = e
-            this.$forceUpdate()
-            this.getDataList()
+            switch (e) {
+                case "员工":
+                    this.$forceUpdate()
+                    this.getDataList()
+                    break;
+                case "客户":
+                    this.$forceUpdate()
+                    this.getClientList()
+                    break;
+                case "群聊":
+                    this.$forceUpdate()
+                    this.getGroupList();
+                    break;
+
+            }
+
+
         },
 
         // 搜索筛选
@@ -341,19 +357,24 @@ export default {
         },
 
         // 获取部门  
-        getDepartList() {
-            this.$axios.post('/GetDepartment').then((res) => {
+        async getDepartList() {
+            var data = { userId: localStorage.getItem('UserId') };
+            await this.$axios.post('/GetDepartment', data).then((res) => {
                 this.optionList = res.data.body;
             })
+            var item = this.optionList.map(getItem => {
+                return getItem.value;
+            });
+            this.departmentId = item.toString();
         },
 
-        // 获取列表
+        // 获取列表员工
         getDataList() {
             this.tableData = []
             let data = {
                 pageSize: this.tablePage.pageSize,
                 pageIndex: this.tablePage.pageCurrent,
-                departmentName: this.searchData.departList,
+                departmentId: this.searchData.departList.length == 0 ? this.departmentId.toString() : this.searchData.departList,
                 search: this.searchData.jobNumber,
                 personneltype: this.checkList
             }
@@ -362,6 +383,56 @@ export default {
                     this.tableLoading = false;
                     this.tableData = res.data.body.result
                     console.log('表格', this.tableData)
+                    this.tablePage = res.data.body
+                    // 表格页数
+                    this.tablePage.pageTotal = res.data.body.total
+                    this.tablePage.pageSize = res.data.body.pageSize
+                    this.tablePage.pageCurrent = res.data.body.pageIndex
+                    this.$forceUpdate()
+                } else {
+                    this.$message.error(res.data.message)
+                }
+            })
+        },
+        // 获取列表 客户
+        getClientList() {
+            this.tableData = []
+            let data = {
+                pageSize: this.tablePage.pageSize,
+                pageIndex: this.tablePage.pageCurrent,
+                departmentId: this.searchData.departList.length == 0 ? this.departmentId.toString() : this.searchData.departList,
+                search: this.searchData.jobNumber,
+                personneltype: this.checkList
+            }
+            this.$axios.post('/GetClientChatList', data).then((res) => {
+                if (res.data.status === 0 && res.data.body.result.length > 0) {
+                    this.tableLoading = false;
+                    this.tableData = res.data.body.result
+                    this.tablePage = res.data.body
+                    // 表格页数
+                    this.tablePage.pageTotal = res.data.body.total
+                    this.tablePage.pageSize = res.data.body.pageSize
+                    this.tablePage.pageCurrent = res.data.body.pageIndex
+                    this.$forceUpdate()
+                } else {
+                    this.$message.error(res.data.message)
+                }
+            })
+        },
+        //获取群聊
+        getGroupList() {
+            this.tableData = []
+            let data = {
+                pageSize: this.tablePage.pageSize,
+                pageIndex: this.tablePage.pageCurrent,
+                departmentId: this.searchData.departList.length == 0 ? this.departmentId.toString() : this.searchData.departList,
+                search: this.searchData.jobNumber,
+                personneltype: this.checkList
+            }
+            this.$axios.post('/GetGroupChatList', data).then((res) => {
+                if (res.data.status === 0 && res.data.body.result.length > 0) {
+                    this.tableLoading = false;
+                    this.tableData = res.data.body.result
                     this.tablePage = res.data.body
                     // 表格页数
                     this.tablePage.pageTotal = res.data.body.total
@@ -392,14 +463,9 @@ export default {
 
     },
 
-    created() {
-        if (!localStorage.getItem('Id') && !localStorage.getItem('departmentList')) {
-            return this.$router.push('/login');
-        }
-        this.getDepartList() // 获取部门列表
-        this.getDataList() // 获取表格列表
-        
-        console.log(localStorage.getItem('Id'), localStorage.getItem('departmentList'))
+    async created() {
+        await this.getDepartList() // 获取部门列表
+        this.getDataList()// 获取表格列表
     }
 }
 </script>

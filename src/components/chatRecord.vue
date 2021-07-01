@@ -6,17 +6,17 @@
  * @LastEditors: mzr
 -->
 <template>
-  <div class="chat_record">
-      <div class="record_top">
-          <div class="top_action"><el-checkbox v-model="checkAction" @change="checkChange">只看员工发送</el-checkbox></div>
-          <div class="top_total">共有{{tablePage.pageTotal}}条"{{inputSearch}}"相关记录</div>
-      </div>
-      <!-- 列表 -->
-      <div class="record_list">
-           <el-table :data="recordList">
-                <el-table-column
-                    min-width="50%"
-                    label="发送人">
+    <div class="chat_record">
+        <div class="record_top">
+            <div class="top_action">
+                <el-checkbox v-model="checkAction" @change="checkChange">只看员工发送</el-checkbox>
+            </div>
+            <div class="top_total">共有{{tablePage.pageTotal}}条"{{inputSearch}}"相关记录</div>
+        </div>
+        <!-- 列表 -->
+        <div class="record_list">
+            <el-table :data="recordList">
+                <el-table-column min-width="50%" label="发送人">
                     <template slot-scope="scope">
                         <div class="table_wechat">
                             <div class="table_img">
@@ -30,58 +30,30 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column
-                    prop="sendType"
-                    label="发送人类型"
-                    min-width="40%"
-                >
+                <el-table-column prop="sendType" label="发送人类型" min-width="40%">
                 </el-table-column>
-                <el-table-column
-                    prop="chatType"
-                    label="聊天类型"
-                    min-width="40%"
-                >
+                <el-table-column prop="chatType" label="聊天类型" min-width="40%">
                 </el-table-column>
-                <el-table-column
-                    label="消息内容"
-                    >
+                <el-table-column label="消息内容">
                     <template slot-scope="scope">
                         <div class="table_message">
                             <span v-for="(item, index) in scope.row.chatContent.split(inputSearch)" :key="index">{{item}}<span style="color: #409eff" v-if="index < scope.row.chatContent.split(inputSearch).length - 1">{{inputSearch}}</span></span>
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column
-                    label="操作"
-                    min-width="30%"
-                >
+                <el-table-column label="操作" min-width="30%">
                     <template slot-scope="scope">
-                        <el-button 
-                            type="primary" 
-                            round
-                            @click="openDetail(scope.row)"
-                            >详情</el-button>
+                        <el-button type="primary" round @click="openDetail(scope.row)">详情</el-button>
                     </template>
                 </el-table-column>
             </el-table>
             <!-- 分页 -->
-            <el-pagination
-                background
-                layout="prev, pager, next" 
-                :total="tablePage.pageTotal" 
-                :page-size.sync="tablePage.pageSize" 
-                :current-page.sync="tablePage.pageCurrent"
-                @current-change="changePageIndex"
-            >
+            <el-pagination background layout="prev, pager, next" :total="tablePage.pageTotal" :page-size.sync="tablePage.pageSize" :current-page.sync="tablePage.pageCurrent" @current-change="changePageIndex">
             </el-pagination>
-      </div>
+        </div>
 
-      <!-- 对话框 -->
-      <el-dialog
-        custom-class="chatDialog" 
-        :visible.sync="showDetail"
-        width="800px"
-        >
+        <!-- 对话框 -->
+        <el-dialog custom-class="chatDialog" :visible.sync="showDetail" width="800px">
             <div slot="title" class="chat_dialog">
                 <div class="title_img">
                     <img v-if="detailMessage.photoUrl" :src="detailMessage.photoUrl" />
@@ -93,8 +65,8 @@
             <div class="dialog_content">
                 <SituationChat v-bind:recordList="chatList"></SituationChat>
             </div>
-      </el-dialog>
-  </div>
+        </el-dialog>
+    </div>
 </template>
 
 <script>
@@ -104,11 +76,15 @@ export default {
         inputSearch: {
             type: String,
             default: () => "",
+        },
+        department: {
+            type: String,
+            default: () => "",
         }
 
     },
     components: {
-        
+
         SituationChat: () => import("./situationChat"), // 聊天对话
     },
     data() {
@@ -117,7 +93,7 @@ export default {
 
             showDetail: false, // 聊天记录对话框
 
-            
+
             recordList: [], // 聊天记录列表
 
             tablePage: {
@@ -128,46 +104,47 @@ export default {
 
             detailMessage: {}, // 表格每一条数据
 
-            chatList:[], // 聊天记录数据
+            chatList: [], // 聊天记录数据
 
             thisPassnegerList: [], // userid集合
 
         }
     },
-    methods:{
+    methods: {
 
         // 只查看员工发送
         checkChange(e) {
 
             this.checkAction = e
             this.getChatList();
-            
+
         },
 
         // 表格翻页
-        changePageIndex(){
+        changePageIndex() {
             this.getChatList()
         },
 
         // 获取列表
         getChatList() {
             let data = {
-                pageIndex:this.tablePage.pageCurrent,
-                pageSize:this.tablePage.pageSize,
-                isStaff:this.checkAction?'员工':'',
-                search:this.inputSearch
+                pageIndex: this.tablePage.pageCurrent,
+                pageSize: this.tablePage.pageSize,
+                isStaff: this.checkAction ? '员工' : '',
+                search: this.inputSearch,
+                departmentId: this.department,
             }
-            this.$axios.post('/GetChatSearchList',data).then((res) => {
-                
-                if(res.data.status === 0 && res.data.body.result.length > 0) {
-                    
+            this.$axios.post('/GetChatSearchList', data).then((res) => {
+
+                if (res.data.status === 0 && res.data.body.result.length > 0) {
+
                     this.recordList = res.data.body.result
                     this.tablePage = res.data.body
-                     // 表格页数
+                    // 表格页数
                     this.tablePage.pageTotal = res.data.body.total
                     this.tablePage.pageSize = res.data.body.pageSize
                     this.tablePage.pageCurrent = res.data.body.pageIndex
-                }else {
+                } else {
                     this.$message.error(res.data.message)
                 }
             })
@@ -175,7 +152,7 @@ export default {
 
         // 获取详细聊天   val 表格一条数据
         openDetail(val) {
-            console.log('详情',val)
+            console.log('详情', val)
             // 对话框弹起 
             this.showDetail = true;
             this.detailMessage = val
@@ -188,24 +165,24 @@ export default {
 
             let passengerList = []
 
-            this.$axios.post('/GetUserParticularChat',data).then((res) => {
-                if(res.data.status === 0 && res.data.body.result.length > 0) {
+            this.$axios.post('/GetUserParticularChat', data).then((res) => {
+                if (res.data.status === 0 && res.data.body.result.length > 0) {
 
                     let newRecordList = []
                     newRecordList = res.data.body.result
-                    
+
                     newRecordList.forEach(item => {
-                        
+
                         passengerList.push(item.from || item.to)
                         item['name'] = item.from                                         // 聊天对话组件 名字
                         item['type'] = item.from === this.detailMessage.userid ? 2 : 1   // 聊天对话组件 接收方还是发送方
 
                         // 转发对话框组件  群聊
-                        if(item.contentType === 'mixed' && item.receiver.length > 1) {   
+                        if (item.contentType === 'mixed' && item.receiver.length > 1) {
                             item['groupMessageForward'] = true
                         }
                         // 转发对话框组件  单个
-                        if(item.contentType === 'mixed' && item.receiver[0] !== this.detailMessage.userid) {
+                        if (item.contentType === 'mixed' && item.receiver[0] !== this.detailMessage.userid) {
                             item['singleForward'] = true
                         }
                     })
@@ -218,7 +195,7 @@ export default {
                             this.chatList = text
                         })
 
-                }else {
+                } else {
 
                     this.$message.error(res.data.message)
                 }
@@ -226,15 +203,15 @@ export default {
         },
 
         // 获取用户信息   e 群聊个人信息  
-        getUserMessageData(e,val, type) {
-            console.log(val, '传参' )
+        getUserMessageData(e, val, type) {
+            console.log(val, '传参')
             let data = {
                 userid: e ? e.userid : String(this.thisPassnegerList)
             }
             return this.$axios.post('/GetAllUserList', data).then((res) => {
 
                 if (res.data.status === 0 && res.data.body.length > 0) {
-                    
+
                     for (let i = 0; i < val.length; i++) {
                         for (let o = 0; o < res.data.body.length; o++) {
                             // 聊天对话组件 名字 头像
@@ -270,7 +247,7 @@ export default {
     .record_top {
         display: flex;
         align-items: center;
-        padding:25px 38px;
+        padding: 25px 38px;
         .top_total {
             font-size: 10px;
             color: #999;
@@ -278,14 +255,14 @@ export default {
         }
         .top_action {
             /deep/ .el-checkbox__input.is-checked .el-checkbox__inner,
-             .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+            .el-checkbox__input.is-indeterminate .el-checkbox__inner {
                 background-color: #0070e2;
                 border-color: #0070e2;
-             }
-            
-             /deep/ .el-checkbox__input.is-checked+.el-checkbox__label {
-                 color: #0070e2;
-             }
+            }
+
+            /deep/ .el-checkbox__input.is-checked + .el-checkbox__label {
+                color: #0070e2;
+            }
         }
     }
     .record_list {
@@ -307,9 +284,9 @@ export default {
                 background-color: lightgray;
                 margin-right: 10px;
                 img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: contain;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
                 }
                 .not_img {
                     width: 100%;
@@ -317,12 +294,12 @@ export default {
                     line-height: 45px;
                     text-align: center;
                 }
-        }
-        // 分页
-        .el-pagination {
-            text-align: right;
-            margin: 20px 15px;
-        }
+            }
+            // 分页
+            .el-pagination {
+                text-align: right;
+                margin: 20px 15px;
+            }
         }
         .table_message {
             white-space: nowrap;
@@ -336,12 +313,9 @@ export default {
         }
         // 详情按钮样式
         /deep/ .el-button {
-           
             width: 96px;
             height: 38px;
-            
         }
-
     }
     // 对话框
     .chatDialog {
@@ -373,17 +347,17 @@ export default {
         .el-dialog__header {
             border-bottom: 1px solid lightgray;
             .el-dialog__headerbtn {
-                top:28px;
-                right:28px;
+                top: 28px;
+                right: 28px;
                 font-size: 23px;
                 font-weight: bold;
             }
         }
         // 内容
         .dialog_content {
-            width:auto;
+            width: auto;
             overflow-y: auto;
-            height: 60vh;  
+            height: 60vh;
         }
     }
 }

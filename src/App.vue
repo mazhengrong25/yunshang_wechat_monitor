@@ -20,7 +20,7 @@
         </el-main>
       </el-container>
     </el-container> -->
-        <ConfigTemplate></ConfigTemplate>
+        <!-- <ConfigTemplate></ConfigTemplate> -->
     </div>
 </template>
 

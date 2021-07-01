@@ -19,12 +19,12 @@
                 </div>
                 <div class="right_input">
                     <div class="input_item">
-                      <div class="input_bar"></div>
-                      <el-input v-model="accountNumber" placeholder="账号" clearable></el-input>
+                        <div class="input_bar"></div>
+                        <el-input v-model="accountNumber" placeholder="账号" clearable></el-input>
                     </div>
                     <div class="input_item">
-                      <div class="input_bar"></div>
-                      <el-input v-model="passWord" placeholder="密码" show-password></el-input>
+                        <div class="input_bar"></div>
+                        <el-input v-model="passWord" placeholder="密码" show-password></el-input>
                     </div>
                 </div>
                 <div class="right_check">
@@ -68,8 +68,9 @@ export default {
             this.$axios.post("/Login", data).then((res) => {
                 if (res.data.status === 0) {
                     this.data = res.data.body
-                    localStorage.setItem('Id', this.data.Id)
-                    localStorage.setItem('departmentList', this.data.departmentList)
+                    localStorage.setItem('UserId', this.accountNumber);
+                    // localStorage.setItem('Id', this.data.Id)
+                    // localStorage.setItem('departmentList', this.data.departmentList)
                     this.$router.push({
                         name: 'Index',
                         path: "/index",
@@ -110,7 +111,7 @@ export default {
         width: 1000px;
         margin: 0 auto;
         display: flex;
-        box-shadow: 0px 0px 50px #CED5E9;
+        box-shadow: 0px 0px 50px #ced5e9;
         .content_left {
             width: 500px;
             height: 580px;
@@ -148,21 +149,21 @@ export default {
                 width: 320px;
                 margin: 0 auto;
                 .input_item {
-                  display: inline-flex;
-                  .input_bar {
-                    width: 6px;
-                    height: 38px;
-                    background: #0070E2;
-                  }
-                  /deep/ .el-input {
-                      width: 314px;
-                      margin-bottom: 26px;
-                      .el-input__inner {
-                          height: 38px;
-                          background-color: #f7f7f7;
-                          border: 1px solid #f7f7f7;
-                      }
-                  }
+                    display: inline-flex;
+                    .input_bar {
+                        width: 6px;
+                        height: 38px;
+                        background: #0070e2;
+                    }
+                    /deep/ .el-input {
+                        width: 314px;
+                        margin-bottom: 26px;
+                        .el-input__inner {
+                            height: 38px;
+                            background-color: #f7f7f7;
+                            border: 1px solid #f7f7f7;
+                        }
+                    }
                 }
             }
             .right_check {
@@ -172,30 +173,29 @@ export default {
                 /deep/ .el-checkbox__inner {
                     width: 18px;
                     height: 18px;
-                    border: 1px solid #D9E1EA;
+                    border: 1px solid #d9e1ea;
                     border-radius: 2px;
                     &::after {
-                        border: 2px solid #0070E2;
+                        border: 2px solid #0070e2;
                         height: 9px;
                         left: 6px;
                         border-left: 0;
                         border-top: 0;
                     }
                 }
-                
+
                 /deep/ .el-checkbox__input.is-checked .el-checkbox__inner,
-                 .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+                .el-checkbox__input.is-indeterminate .el-checkbox__inner {
                     background-color: unset;
-                    border-color: #D9E1EA;
+                    border-color: #d9e1ea;
                 }
 
-                /deep/ .el-checkbox__input.is-checked+.el-checkbox__label {
-                    color: #D9E1EA;
+                /deep/ .el-checkbox__input.is-checked + .el-checkbox__label {
+                    color: #d9e1ea;
                 }
                 /deep/ .el-checkbox {
-                    color: #D9E1EA;
+                    color: #d9e1ea;
                 }
-                
             }
             .right_button {
                 width: 320px;
