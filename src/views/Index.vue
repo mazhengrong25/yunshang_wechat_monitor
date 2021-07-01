@@ -2,7 +2,7 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-06-28 16:26:52
+ * @LastEditTime: 2021-07-01 10:37:52
  * @LastEditors: mzr
 -->
 
@@ -330,24 +330,14 @@ export default {
 
         // 单选框绑定值变化
         changeCheck(e) {
-            this.checkList = e
-            switch (e) {
-                case "员工":
-                    this.$forceUpdate()
-                    this.getDataList()
-                    break;
-                case "客户":
-                    this.$forceUpdate()
-                    this.getClientList()
-                    break;
-                case "群聊":
-                    this.$forceUpdate()
-                    this.getGroupList();
-                    break;
-
+            // 还原初始值
+            this.tablePage = {
+                pageTotal: 0,  // 表格总数
+                pageSize: 8, // 每页大小
+                pageCurrent: 1 // 当前页数
             }
-
-
+            this.checkList = e
+            this.getDataList();
         },
 
         // 搜索筛选
@@ -367,10 +357,16 @@ export default {
             });
             this.departmentId = item.toString();
         },
-
         // 获取列表员工
         getDataList() {
-            this.tableData = []
+
+            
+            // 确定员工 客户 群聊url
+            let url = this.checkList === '员工'?'/GetAllUserChatList':
+                            this.checkList === '客户'?'/GetClientChatList':
+                                this.checkList === '群聊'?'/GetGroupChatList':''
+
+            this.tableLoading = true;
             let data = {
                 pageSize: this.tablePage.pageSize,
                 pageIndex: this.tablePage.pageCurrent,
@@ -378,61 +374,11 @@ export default {
                 search: this.searchData.jobNumber,
                 personneltype: this.checkList
             }
-            this.$axios.post('/GetAllUserChatList', data).then((res) => {
+            this.$axios.post(url, data).then((res) => {
                 if (res.data.status === 0 && res.data.body.result.length > 0) {
                     this.tableLoading = false;
                     this.tableData = res.data.body.result
                     console.log('表格', this.tableData)
-                    this.tablePage = res.data.body
-                    // 表格页数
-                    this.tablePage.pageTotal = res.data.body.total
-                    this.tablePage.pageSize = res.data.body.pageSize
-                    this.tablePage.pageCurrent = res.data.body.pageIndex
-                    this.$forceUpdate()
-                } else {
-                    this.$message.error(res.data.message)
-                }
-            })
-        },
-        // 获取列表 客户
-        getClientList() {
-            this.tableData = []
-            let data = {
-                pageSize: this.tablePage.pageSize,
-                pageIndex: this.tablePage.pageCurrent,
-                departmentId: this.searchData.departList.length == 0 ? this.departmentId.toString() : this.searchData.departList,
-                search: this.searchData.jobNumber,
-                personneltype: this.checkList
-            }
-            this.$axios.post('/GetClientChatList', data).then((res) => {
-                if (res.data.status === 0 && res.data.body.result.length > 0) {
-                    this.tableLoading = false;
-                    this.tableData = res.data.body.result
-                    this.tablePage = res.data.body
-                    // 表格页数
-                    this.tablePage.pageTotal = res.data.body.total
-                    this.tablePage.pageSize = res.data.body.pageSize
-                    this.tablePage.pageCurrent = res.data.body.pageIndex
-                    this.$forceUpdate()
-                } else {
-                    this.$message.error(res.data.message)
-                }
-            })
-        },
-        //获取群聊
-        getGroupList() {
-            this.tableData = []
-            let data = {
-                pageSize: this.tablePage.pageSize,
-                pageIndex: this.tablePage.pageCurrent,
-                departmentId: this.searchData.departList.length == 0 ? this.departmentId.toString() : this.searchData.departList,
-                search: this.searchData.jobNumber,
-                personneltype: this.checkList
-            }
-            this.$axios.post('/GetGroupChatList', data).then((res) => {
-                if (res.data.status === 0 && res.data.body.result.length > 0) {
-                    this.tableLoading = false;
-                    this.tableData = res.data.body.result
                     this.tablePage = res.data.body
                     // 表格页数
                     this.tablePage.pageTotal = res.data.body.total
@@ -458,8 +404,6 @@ export default {
                 return ''
             }
         }
-
-
 
     },
 
