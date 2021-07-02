@@ -69,8 +69,6 @@ export default {
                 if (res.data.status === 0) {
                     this.data = res.data.body
                     localStorage.setItem('UserId', this.accountNumber);
-                    // localStorage.setItem('Id', this.data.Id)
-                    // localStorage.setItem('departmentList', this.data.departmentList)
                     this.$router.push({
                         name: 'Index',
                         path: "/index",
