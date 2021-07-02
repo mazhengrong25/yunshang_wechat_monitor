@@ -46,6 +46,7 @@
                     </el-table-column>
                     <el-table-column label="操作">
                         <template slot-scope="scope">
+                            <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
                             <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                         </template>
                     </el-table-column>
@@ -62,10 +63,11 @@ export default {
     data() {
         return {
             form: {
+                id: "",
                 configName: "",
                 configNumber: "",
                 departmentId: "",
-                departmentIds:"",
+                departmentIds: "",
                 departmentName: "",
                 staffidList: "",
                 staffidNameList: ""
@@ -129,9 +131,6 @@ export default {
             }
             return current;
         },
-
-
-
         AddUser(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
@@ -144,7 +143,11 @@ export default {
                             this.$message({ message: "添加成功", type: 'success', duration: 1000 });
                             this.formvisible = false;
                         }
-                       this.QueryData();
+                        else {
+                            this.$message({ message: res.data.message, type: 'error', duration: 1000 });
+                        }
+
+                        this.QueryData();
                     })
                 } else {
                     this.$message({ message: "添加失败", type: 'error', duration: 1000 });
@@ -152,6 +155,21 @@ export default {
                 }
             });
         },
+        handleEdit(index, row) {
+            var data = {
+                id: row.Id
+            };
+            this.$axios.post('/UpdateUserRole', data).then((res) => {
+                if (res.data.status == 0) {
+                    this.form.id= res.data.body.Id;
+                    this.form.configName = res.data.body.ConfigName;
+                    this.form.configNumber = res.data.body.ConfigNumber;
+                    this.form.departmentId = res.data.body.DepartmentIdList;
+                    this.formvisible = true;
+                }
+            })
+        },
+
         handleDelete(index, row) {
             var data = {
                 id: row.Id
@@ -182,8 +200,11 @@ export default {
             this.form.departmentName = result;
             this.form.departmentIds = resultId;
         }
-
-
+    },
+    created() {
+        if (localStorage.getItem('UserId') && localStorage.getItem('UserId') != "7928") {
+            return this.$router.push('/index');
+        }
     }
 };
 </script>
