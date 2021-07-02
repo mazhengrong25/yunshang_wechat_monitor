@@ -144,14 +144,13 @@ export default {
                             this.$message({ message: "添加成功", type: 'success', duration: 1000 });
                             this.formvisible = false;
                         }
+                       this.QueryData();
                     })
                 } else {
                     this.$message({ message: "添加失败", type: 'error', duration: 1000 });
                     return false;
                 }
             });
-            this.QueryData();
-
         },
         handleDelete(index, row) {
             var data = {
