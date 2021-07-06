@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-07-06 10:47:28
+ * @LastEditTime: 2021-07-06 14:44:29
  * @LastEditors: mzr
 -->
 <template>
@@ -107,7 +107,7 @@
                         </el-tabs>
                     </div>
                 </div>
-                <!-- 私聊 群聊列表 -->
+                <!-- 员工客户列表 -->
                 <div v-else>
                     <div class="left_query">
                         <el-input style="width:200px" placeholder="搜索" clearable @keyup.enter.native="listSearch" v-model="inputSearch">
@@ -290,7 +290,7 @@
                             :total="recordList.pageTotal" 
                             :page-size.sync="recordList.pageSize" 
                             :current-page.sync="recordList.pageCurrent"
-                            @current-change="changeSituationPage"
+                            @prev-click="changeSituationPage"
                         ></el-pagination>
                     </div>
 
@@ -380,7 +380,7 @@ export default {
 
 
             textSumList: [],    // 搜索记录 搜索内容列表
-            chatList: [],       // 存放私聊群聊
+            chatList: [],       // 存放员工客户
             recordList: [],     // 聊天记录对话
             groupList: [],      // 存放群聊
             personList: [],     // 存放群聊单个信息
@@ -473,7 +473,7 @@ export default {
         // 获取聊天对话  
         // val 每一条数据  
         // type(true false) true表示从日历进入相关天数到对应界面位置
-        chatDetail(val, type) {
+        chatDetail(val, type, u) {
 
             if (val) {
 
@@ -485,14 +485,16 @@ export default {
                 this.dialogItem = this.chatList[0]
             }
 
+            console.log('单个',this.dialogItem)
             let data = {
                 pageSize: this.chatPageSize,
                 pageIndex: this.chatPageIndex,
             }
 
-            // 区分群聊 私聊
+            // 区分群聊 私聊  
             if (this.listType === '群聊') {
                 data['sessionid'] = this.userMessage.userid
+                data['startdate'] = this.calendarValue ? this.$moment(this.calendarValue).format("YYYY-MM-DD HH:mm:ss") : this.$moment().format("YYYY-MM-DD HH:mm:ss")
             } else {
                 data['sessionid'] = val ? val.sessionid : this.chatList[0].sessionid
                 data['startdate'] = val ? val.endTime : this.chatList[0].endTime
@@ -506,11 +508,26 @@ export default {
 
             let passengerList = []
 
+            if(u) {
+                data['sortType'] = u
+                    if(u === 'top'){
+                        data['id'] = this.recordList[0].id
+                    }
+            }
+
             this.$axios.post('/GetUserParticularChat', data).then((res) => {
 
                 if (res.data.status === 0) {
                     let newRecordList
                     newRecordList = res.data.body.result
+
+                    if(u) {  
+                        if(u === 'top'){
+                            newRecordList = res.data.body.result.concat(this.recordList)
+                        }else if(u === 'button'){
+                            newRecordList = this.recordList.concat(res.data.body.result)  
+                        }
+                    }
                 
                     newRecordList.forEach(item => {
                         passengerList.push(item.from || item.to)
@@ -537,6 +554,7 @@ export default {
                             this.recordList = text
                     }) 
                     
+                    console.log('recordList',this.recordList)
                 } else {
                     this.$message.error(res.data.message)
                 }
@@ -545,13 +563,15 @@ export default {
 
         // 聊天对话分页
         changeSituationPage() {
-            this.chatDetail()
+            console.log('上一页',val)
+            // this.chatPageIndex = this.chatPageIndex + 1
+            // this.chatDetail()
         },
         
         // 获取聊天对话  单个
         getChatDetail(e) {
+            console.log('员工e',e)
             this.chatDetail(e)
-            this.pageLoading = true
         },
 
         // 打开群聊列表对应弹窗
@@ -561,6 +581,7 @@ export default {
                 userid: val.userid
             }
             this.getUserMessageData(data);
+            console.log('群聊val',val)
             this.chatDetail(val)
         },
 
@@ -723,7 +744,7 @@ export default {
 
         // 组装群成员信息 
         getGroupData(type) {
-            console.log('组装信息type', type, this.groupList)
+            
             let data = []
             if (type) {
                 // 群聊人员列表传值 type为true判断是否与tabs值相等，输出对应值
@@ -764,6 +785,7 @@ export default {
 
                     // 群成员列表
                     this.groupList = res.data.body
+                    console.log('groupList',this.groupList)
                     // 判断群主
                     let groupMaster = {}
                     for (let i = 0; i < this.groupList.length; i++) {
@@ -790,9 +812,8 @@ export default {
         this.userMessage = this.$route.query // 用户信息 
         console.log(this.listType)
         if (this.listType === '群聊') {
-            console.log('acion')
             await this.getGroupList() // 群聊列表
-            // await this.chatDetail()  // 获取当前群聊 聊天记录
+            await this.chatDetail()  // 获取当前群聊 聊天记录
         } else {
             await this.getChatList() // 私聊 群聊列表
 
