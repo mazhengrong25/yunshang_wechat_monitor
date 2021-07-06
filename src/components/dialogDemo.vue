@@ -2,7 +2,7 @@
  * @Description: 对话框  ---  标记 下载聊天对话
  * @Author: mzr
  * @Date: 2021-06-02 16:47:40
- * @LastEditTime: 2021-06-17 15:35:10
+ * @LastEditTime: 2021-07-05 15:47:55
  * @LastEditors: mzr
 -->
 <template>
@@ -55,7 +55,7 @@ export default {
       type:Boolean,
       default: () => false
     },
-    // 区分标记和下载
+    // 区分标记和下载   true 标记
     dialogType : {
       type:Boolean,
       default: () => false

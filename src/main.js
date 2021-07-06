@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:33:05
- * @LastEditTime: 2021-06-25 17:14:30
+ * @LastEditTime: 2021-07-05 14:17:26
  * @LastEditors: mzr
  */
 import Vue from 'vue'
@@ -15,7 +15,6 @@ import router from './router'
 Vue.config.productionTip = false
 // 设置默认路由前缀
 axios.defaults.baseURL = "/WxChat"
-// 拦截器
 
 import axios from "./api/api"
 Vue.prototype.$axios = axios;

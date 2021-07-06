@@ -2,7 +2,7 @@
  * @Description: 主页
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:40:24
- * @LastEditTime: 2021-07-01 10:37:52
+ * @LastEditTime: 2021-07-05 15:13:05
  * @LastEditors: mzr
 -->
 
@@ -159,7 +159,7 @@
                 </el-table>
                 <!-- 群聊 -->
                 <el-table v-loading="tableLoading" :data="tableData" v-if="checkList === '群聊'">
-                    <el-table-column show-overflow-tooltip label="群名称" min-width="35%">
+                    <el-table-column  label="群名称" min-width="35%">
                         <template slot-scope="scope">
                             <div class="table_wechat">
                                 <div class="table_img not_background">

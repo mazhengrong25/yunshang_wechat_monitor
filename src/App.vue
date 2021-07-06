@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: mzr
  * @Date: 2021-04-16 10:22:50
- * @LastEditTime: 2021-06-25 10:57:11
+ * @LastEditTime: 2021-07-05 14:57:34
  * @LastEditors: mzr
 -->
 <template>
@@ -19,9 +19,8 @@
           <router-view />
         </el-main>
       </el-container>
-    </el-container> -->
-        <!-- <ConfigTemplate></ConfigTemplate> -->
-    </div>
+    </el-container> 
+  </div>
 </template>
 
 <script>

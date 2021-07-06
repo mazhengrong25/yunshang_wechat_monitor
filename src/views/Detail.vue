@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-06-18 10:24:48
+ * @LastEditTime: 2021-07-06 10:47:28
  * @LastEditors: mzr
 -->
 <template>
@@ -149,12 +149,12 @@
                     <div class="right_action_item">
                         <div class="action_icon"></div>
                         <div class="action_title">联系人已同意聊天记录存档</div>
-                        <div class="action_message" v-if="listType === '员工'" @click="openTagDialog">
+                        <div class="action_message" v-if="listType === '员工'" @click="openPrompt">
                             <i class="element-icons el-iconbiaoji"></i>
                         </div>
                     </div>
                     <div class="right_action_item">
-                        <div class="action_load" @click="openLoadDialog">
+                        <div class="action_load" @click="openPrompt">
                             <i class="el-icon-download"></i>
                             <span>下载</span>
                         </div>
@@ -280,46 +280,37 @@
                         </div>
                     </div>
                 </div>
-                <!-- 聊天对话 -->
-                <!-- 
-                    :class="scrollFixed === true ? 'isFixed':'right_content'"
-                 -->
-                <div 
-                    class="right_content"
-                    ref="rightContent" 
-                    @mousewheel="handleScroll"
-                >
-
-                    <div style="height: 50px; overflow:auto;"></div>
-                    <div ref="situationChat">
-                        <SituationChat v-bind:recordList="recordList"></SituationChat>
+                <!-- 聊天对话 --> 
+                <div class="right_content"> 
+                    <SituationChat v-bind:recordList="recordList"></SituationChat>
+                    <div class="right_content_pagination">
+                        <el-pagination 
+                            background 
+                            layout="prev, pager, next" 
+                            :total="recordList.pageTotal" 
+                            :page-size.sync="recordList.pageSize" 
+                            :current-page.sync="recordList.pageCurrent"
+                            @current-change="changeSituationPage"
+                        ></el-pagination>
                     </div>
 
-                    <div class="right_content_more_load" v-if="pageLoading">
-                        <i class="el-icon-loading"></i>
-                        <span>加载中...</span>
-                    </div>
-                    <div class="right_content_more_load" v-else>
-                        <span>加载完成</span>
-                    </div>
                 </div>
-
             </div>
         </div>
 
         <!-- 标记对话框 -->
-        <DialogDemo 
+        <!-- <DialogDemo 
             :dialogTitle="tagTitle"
             :showDialog="showTag"
             :dialogType="true"
             @closeModal="closeTagDialog"
-        ></DialogDemo>
+        ></DialogDemo> -->
         <!-- 下载对话框 -->
-        <DialogDemo 
+        <!-- <DialogDemo 
             :dialogTitle="loadTitle"
             :showDialog="showLoad"
             @closeModal="closeLoadDialog"
-        ></DialogDemo>
+        ></DialogDemo> -->
     </div>
 </template>
 
@@ -330,7 +321,7 @@ export default {
 
         SearchContent: () => import("../components/searchContent"),   // 搜索聊天内容  
         SituationChat,
-        DialogDemo: () => import("../components/dialogDemo.vue")  // 对话框  （下载/标记）
+        // DialogDemo: () => import("../components/dialogDemo.vue")  // 对话框  （下载/标记）
     },
     data() {
         return {
@@ -363,12 +354,7 @@ export default {
             tagTitle: "添加标记内容",
             loadTitle: "下载聊天记录",
 
-            dataLoading: true, // 群聊个人信息介绍  数据加载
-            pageLoading: true, // 页面分页默认值
-            scrollFixed: false, // 滚动条距离
-
-            chatPageIndex: 1, // 获取聊天对话 当前默认页数 下划
-            chatPageSignIndex: 1, // 上拉 默认页数
+            chatPageIndex: 1, // 获取聊天对话 当前默认页数
             chatPageSize: 10, // 获取聊天对话 页数
 
             // 私聊群聊列表标签
@@ -487,9 +473,7 @@ export default {
         // 获取聊天对话  
         // val 每一条数据  
         // type(true false) true表示从日历进入相关天数到对应界面位置
-        // u 聊天记录分页加载  上划(top) 下划(button)  
-        
-        chatDetail(val, type, u) {
+        chatDetail(val, type) {
 
             if (val) {
 
@@ -503,7 +487,7 @@ export default {
 
             let data = {
                 pageSize: this.chatPageSize,
-                pageIndex: u === 'top' ? this.chatPageSignIndex : this.chatPageIndex,
+                pageIndex: this.chatPageIndex,
             }
 
             // 区分群聊 私聊
@@ -522,31 +506,11 @@ export default {
 
             let passengerList = []
 
-            // 聊天记录 上划 
-            if(u) {
-                data['sortType'] = u
-                    if(u === 'top'){
-                        data['id'] = this.recordList[0].id
-                    }
-            }
-
             this.$axios.post('/GetUserParticularChat', data).then((res) => {
 
                 if (res.data.status === 0) {
                     let newRecordList
                     newRecordList = res.data.body.result
-                    
-                    // 判断是否为滚动加载
-                    if(u) {  
-                        if(u === 'top'){
-                            newRecordList = res.data.body.result.concat(this.recordList)
-                            this.pageLoading = true
-                        }else if(u === 'button'){
-                            newRecordList = this.recordList.concat(res.data.body.result)
-                            this.pageLoading = true  
-                        }
-                    }
-
                 
                     newRecordList.forEach(item => {
                         passengerList.push(item.from || item.to)
@@ -578,58 +542,14 @@ export default {
                 }
             })
         },
+
+        // 聊天对话分页
+        changeSituationPage() {
+            this.chatDetail()
+        },
         
-        // 滚动事件
-        handleScroll() {
-            
-            let pDom = this.$refs.situationChat  // 聊天盒子
-            let thisDom = this.$refs.rightContent  // 聊天盒子 父级
-            let windowHeight = thisDom.offsetHeight  // 聊天盒子 父级 视口高度
-            let scroll = thisDom.scrollTop  // 距离顶部高度
-            let domHight = pDom.offsetHeight   // 盒子高度 父级
-            console.log('滚动条离开父级高度', scroll, '父级高度', windowHeight, '顶部和视口', domHight)
-
-            
-            let scrollNumber = scroll + windowHeight
-
-            // 判断加载方式 如果是下拉 refreshDownDetail('button')
-            if (scroll === 0 && this.pageLoading) {
-                console.log('到顶部')
-                this.pageLoading = false
-                // this.chatPageSignIndex = this.chatPageSignIndex + 1
-                this.refreshDownDetail('top')
-                this.chatPageSignIndex = 1
-            }
-
-            if (scrollNumber >= (domHight- 50) && this.pageLoading) {
-                console.log('到底了')
-                
-                this.pageLoading = false
-                this.chatPageIndex = this.chatPageIndex + 1
-                this.refreshDownDetail('button')
-                this.chatPageIndex= 1
-            }
-
-            // 滚动条距离 距离小于50
-            if(scroll < 50) {
-                this.scrollFixed = true
-            }else {
-                this.scrollFixed = false
-            }
-
-        },
-
-        // 获取聊天对话  加载分页 
-        refreshDownDetail(e) {
-            console.log('上还是下',e)
-            this.chatDetail(this.dialogItem,'',e)
-           
-        },
-
         // 获取聊天对话  单个
         getChatDetail(e) {
-            this.chatPageIndex = 1
-            this.chatPageSignIndex = 1
             this.chatDetail(e)
             this.pageLoading = true
         },
@@ -641,7 +561,7 @@ export default {
                 userid: val.userid
             }
             this.getUserMessageData(data);
-            // this.chatDetail(val)
+            this.chatDetail(val)
         },
 
         // 获取用户信息
@@ -687,6 +607,7 @@ export default {
         // 打开搜索记录对话框
         openMessageDialog() {
             this.showSearch = true
+            this.recordSearch = "", // 清空搜索记录输入框缓存
             this.getDateList();
         },
 
@@ -727,10 +648,6 @@ export default {
             let data = JSON.parse(JSON.stringify(this.dialogItem))
             data.endTime = e.day + ' 00:00:00'
 
-            // 聊天分页
-            this.chatPageIndex = 1
-            this.pageLoading = true
-
             await this.chatDetail(data, true)
         },
 
@@ -743,11 +660,8 @@ export default {
             }
             console.log('内容时间', data)
 
-            // 聊天分页
-            this.chatPageIndex = 1
-            this.pageLoading = true
-
             await this.chatDetail(data, true)
+            this.showSearch = false // 跳转到对应位置 关闭弹窗
         },
 
         // 搜索聊天记录   图片/链接  type(true false) true 搜索类型为文字
@@ -886,13 +800,10 @@ export default {
     },
     mounted() {
         
-        this.$refs.rightContent.addEventListener('scroll', this.handleScroll, true)
+       
 
     },
-    // destroyed() {
-    //     this.$refs.rightContent.removeEventListener('scroll', this.handleScroll,true)
-    //     console.log('移除')
-    // }
+   
 }
 </script>
 
@@ -1246,22 +1157,13 @@ export default {
                 width: auto;
                 overflow-y: auto;
                 height: calc(100vh - 188px);
-                // position: static;   // relative
-                // top: 50px;
-                .right_content_more_load {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    span {
-                        font-size: 10px;
-                    }
+                position: relative;
+                .right_content_pagination {
+                    position: fixed;
+                    left: 60%;
+                    bottom: 22px;
                 }
-
             }
-            // .isFixed {
-            //     position: fixed;
-            //     top:0;
-            // }
         }
     }
 
