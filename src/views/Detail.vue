@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-07-07 10:18:13
+ * @LastEditTime: 2021-07-07 11:03:53
  * @LastEditors: mzr
 -->
 <template>
@@ -505,7 +505,7 @@ export default {
             // 区分群聊 私聊  
             if (this.listType === '群聊') {
                 data['sessionid'] = this.userMessage.userid ? "GROUP_"+ this.userMessage.userid : "GROUP_"+ this.groupList[0].sessionid
-                data['startdate'] = this.calendarValue ? this.$moment(this.calendarValue).format("YYYY-MM-DD") : this.$moment().format("YYYY-MM-DD")
+                data['startdate'] = val ? val.endTime : this.$moment().format("YYYY-MM-DD")
             } else {
                 data['sessionid'] = val ? val.sessionid : this.chatList[0].sessionid
                 data['startdate'] = val ? val.endTime : this.chatList[0].endTime
@@ -666,8 +666,13 @@ export default {
             if (!e.day) {
                 return $message.error('时间错误')
             }
-            let data = this.listType === "群聊" ? JSON.parse(JSON.stringify(this.userMessage)) :JSON.parse(JSON.stringify(this.dialogItem))
-            data.endTime = e.day + ' 00:00:00'
+            let data = this.dialogItem
+            if(this.listType === "群聊"){
+                this.userMessage.endTime = e.day
+            }
+            data.endTime = e.day
+
+            console.log(data)
 
             await this.chatDetail(data, true)
         },
@@ -785,7 +790,6 @@ export default {
 
                     // 群成员列表
                     this.groupList = res.data.body
-                    console.log('groupList',this.groupList)
                     // 判断群主
                     let groupMaster = {}
                     for (let i = 0; i < this.groupList.length; i++) {
