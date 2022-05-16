@@ -2,7 +2,7 @@
  * @Description: 登录页
  * @Author: mzr
  * @Date: 2021-06-25 09:42:43
- * @LastEditTime: 2021-06-28 17:01:13
+ * @LastEditTime: 2021-07-09 17:32:53
  * @LastEditors: mzr
 -->
 <template>
@@ -70,7 +70,7 @@ export default {
                     this.data = res.data.body
                     localStorage.setItem('UserId', this.accountNumber);
                     this.$router.push({
-                        name: 'Index',
+                        name: 'Index', 
                         path: "/index",
                     });
                 } else {

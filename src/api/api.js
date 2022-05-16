@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: mzr
  * @Date: 2021-06-18 15:56:02
- * @LastEditTime: 2021-07-05 14:59:07
+ * @LastEditTime: 2021-07-09 17:30:12
  * @LastEditors: mzr
  */
 import axios from "axios"
@@ -19,6 +19,10 @@ if(process.env.NODE_ENV == "production") {
 // http request 拦截器
 axios.interceptors.request.use(
   (config) => {
+    // if(config.type && config.type === '111'){
+    //   config.baseURL = '/qqchat'
+    // }
+    console.log(config)
     if (config.url.indexOf("Authenticate") > 0) {
       return config;
     }

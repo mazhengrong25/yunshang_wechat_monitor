@@ -2,7 +2,7 @@
  * @Description: 聊天记录详情
  * @Author: mzr
  * @Date: 2021-04-25 11:05:51
- * @LastEditTime: 2021-07-07 11:03:53
+ * @LastEditTime: 2021-07-09 17:33:04
  * @LastEditors: mzr
 -->
 <template>
@@ -270,7 +270,7 @@
                                     </div>
                                 </div>
 
-                                <!-- v-if惰性加载 换为v-show  v-show 条件是否成立 都会渲染 相当于 css切换-->
+                                <!-- v-if惰性加载 换为v-show  v-show 条件是否成立 都会渲染 相当于 css切换 -->
                                 <div class="client_icon" slot="reference" @click="openGroupDialog" v-show="isGroup === 'GROUP'">
                                     <i class="element-icons el-iconqiweiqunchengyuan"></i>
                                 </div>
@@ -336,7 +336,6 @@ export default {
 
 
             inputSearch: "", // 列表 搜索值
-            tagContent: "", // 标记内容
             recordSearch: "", // 搜索记录聊天内容 搜索值
 
             // 默认值
@@ -361,7 +360,7 @@ export default {
                 chatPageTotal:"", // 总页数
             }, 
 
-            // 私聊群聊列表标签
+            // 员工客户列表标签
             chatTypeArr: [{
                 name: '全部',
                 value: 'ALL'
@@ -409,7 +408,7 @@ export default {
             // 群成员 弹窗
             groupTypeBtn: "员工", // 默认值 员工
 
-            thisPassnegerList: [], // userid集合
+            thisPassnegerList: [], // userid集合  群聊
 
 
             pageInfoData:{}, // 当前聊天页码数据
@@ -439,8 +438,10 @@ export default {
                             this.chatList.push(item)
                         }
                     })
+                    // 默认展示数组第一个聊天信息
                     this.pageStatus.chatPageIndex = 1
-                    this.chatDetail()
+                    this.chatDetail(this.chatList[0])
+
                 } else {
                     this.$message.error(res.data.message)
                 }
@@ -563,7 +564,6 @@ export default {
 
         // 聊天对话分页
         changeSituationPage(e) {
-            console.log(e)
             this.pageStatus.chatPageIndex = e
             this.chatDetail(this.dialogItem)
         },
@@ -690,7 +690,8 @@ export default {
             this.showSearch = false // 跳转到对应位置 关闭弹窗
         },
 
-        // 搜索聊天记录   图片/链接  type(true false) true 搜索类型为文字
+        // 搜索聊天记录   图片/链接  
+        // type(true false) true 搜索类型为文字  搜索聊天记录
         getRecordSearch(type) {
             let data = {
                 sessionid: this.listType === '群聊' ? "GROUP_"+ this.userMessage.userid : this.dialogItem.sessionid,
@@ -725,22 +726,22 @@ export default {
             this.$message('功能待开发，请敬请期待');
         },
         // 打开标记内容
-        openTagDialog() {
-            this.showTag = true
-        },
+        // openTagDialog() {
+        //     this.showTag = true
+        // },
 
-        closeTagDialog() {
-            this.showTag = false
-        },
+        // closeTagDialog() {
+        //     this.showTag = false
+        // },
 
         // 打开下载内容
-        openLoadDialog() {
-            this.showLoad = true
-        },
+        // openLoadDialog() {
+        //     this.showLoad = true
+        // },
 
-        closeLoadDialog() {
-            this.showLoad = false
-        },
+        // closeLoadDialog() {
+        //     this.showLoad = false
+        // },
 
         // 打开群成员内容
         openGroupDialog() {
@@ -801,6 +802,8 @@ export default {
                     }
                     this.groupList.unshift(groupMaster)
 
+                    // 默认展示数组列表
+                    this.chatDetail(this.userMessage)
                 } else {
                     this.$message.error(res.data.message)
                 }
@@ -812,15 +815,13 @@ export default {
     },
     async created() {
 
-        this.listType = this.$route.query.type // 列表类型
+        this.listType = this.$route.query.type // 区分私聊 群聊
         this.userMessage = this.$route.query // 用户信息 
-        console.log(this.listType)
+        
         if (this.listType === '群聊') {
             await this.getGroupList() // 群聊列表
-            await this.chatDetail(this.userMessage)  // 获取当前群聊 聊天记录
         } else {
-            await this.getChatList() // 私聊 群聊列表
-
+            await this.getChatList() // 员工客户列表
         }
     },
     mounted() {
@@ -917,7 +918,7 @@ export default {
                 /deep/ .el-tabs__nav {
                     display: flex;
                     justify-content: space-around;
-                    width: 100%;
+                    width: 100%
                 }
                 .pane_all_list {
                     .pane_title {
@@ -1046,9 +1047,8 @@ export default {
                         margin: 24px 15px 0px;
                     }
                     .staff_list_item_total {
-                        height: 80vh;
                         overflow-y: auto;
-                        height: calc(100vh - 271px);
+                        height: calc(100vh - 310px);
                         .staff_list_item {
                             padding: 15px 15px 0px;
                             border-bottom: 2px solid #e4e7ed;

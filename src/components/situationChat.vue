@@ -2,7 +2,7 @@
  * @Description: 聊天对话
  * @Author: mzr
  * @Date: 2021-05-27 13:59:10
- * @LastEditTime: 2021-06-04 14:38:58
+ * @LastEditTime: 2021-07-07 18:20:09
  * @LastEditors: mzr
 -->
 <template>
@@ -104,7 +104,7 @@ export default {
     //     .date_item {
     //         color: darkgray;
     //         font-size: 10px;
-    //         background-color: lightgray;
+    //         background-color: lightgray; 
     //         padding: 2px 5px;
     //     }
     // }
@@ -116,7 +116,7 @@ export default {
                 display: inline-block;
                 width: 45px;
                 height: 45px;
-                background-color: lightgray;
+                // background-color: lightgray;
                 margin: 21px 10px 0px 0px;
                 img {
                     // width: 100%;

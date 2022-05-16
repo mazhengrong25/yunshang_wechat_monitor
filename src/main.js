@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: wish.WuJunLong
  * @Date: 2021-04-15 14:33:05
- * @LastEditTime: 2021-07-05 14:17:26
+ * @LastEditTime: 2021-11-10 10:20:18
  * @LastEditors: mzr
  */
 import Vue from 'vue'
@@ -11,6 +11,7 @@ import App from './App.vue'
 import './plugins/element.js'
 import './plugins/global.less'
 
+// 页面路径
 import router from './router'
 Vue.config.productionTip = false
 // 设置默认路由前缀
